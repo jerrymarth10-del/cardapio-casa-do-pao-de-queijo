@@ -64,6 +64,7 @@ create table if not exists public.menu_store_products (
 
 create table if not exists public.menu_orders (
   id uuid primary key default gen_random_uuid(),
+  public_token uuid not null default gen_random_uuid() unique,
   order_number text not null unique,
   store_id uuid not null references public.menu_stores(id) on delete restrict,
   customer_name text not null,
@@ -96,6 +97,7 @@ create index if not exists menu_products_category_idx on public.menu_products(ca
 create index if not exists menu_products_active_sort_idx on public.menu_products(is_active, sort_order);
 create index if not exists menu_orders_store_created_idx on public.menu_orders(store_id, created_at desc);
 create index if not exists menu_orders_status_created_idx on public.menu_orders(status, created_at desc);
+create unique index if not exists menu_orders_public_token_idx on public.menu_orders(public_token);
 create index if not exists menu_order_items_order_idx on public.menu_order_items(order_id);
 
 create or replace function public.menu_touch_updated_at()
@@ -127,12 +129,10 @@ alter table public.menu_store_products enable row level security;
 alter table public.menu_orders enable row level security;
 alter table public.menu_order_items enable row level security;
 
--- O administrador só consegue enxergar a própria linha de autorização.
 drop policy if exists "menu_admin_read_self" on public.menu_admins;
 create policy "menu_admin_read_self" on public.menu_admins for select to authenticated
 using (user_id = (select auth.uid()));
 
--- Catálogo público: somente conteúdo ativo. Políticas adicionais dão visão completa aos administradores.
 drop policy if exists "menu_stores_public_read" on public.menu_stores;
 create policy "menu_stores_public_read" on public.menu_stores for select to anon, authenticated using (is_active = true);
 drop policy if exists "menu_categories_public_read" on public.menu_categories;
@@ -142,12 +142,11 @@ create policy "menu_products_public_read" on public.menu_products for select to 
 drop policy if exists "menu_store_products_public_read" on public.menu_store_products;
 create policy "menu_store_products_public_read" on public.menu_store_products for select to anon, authenticated using (true);
 
--- Nenhuma gravação de pedido é permitida diretamente pelo navegador.
--- A rota /api/orders usa SUPABASE_SECRET_KEY somente no servidor da Vercel.
+-- Pedidos não podem ser gravados diretamente pelo navegador.
+-- A rota /api/orders usa a chave secreta somente no servidor da Vercel.
 drop policy if exists "menu_orders_public_insert" on public.menu_orders;
 drop policy if exists "menu_order_items_public_insert" on public.menu_order_items;
 
--- Administração completa, protegida pela tabela menu_admins.
 do $$
 declare
   table_name text;
@@ -162,14 +161,12 @@ begin
   end loop;
 end $$;
 
--- Permissões da Data API. RLS continua sendo a barreira de autorização.
 grant usage on schema public to anon, authenticated;
 grant select on public.menu_stores, public.menu_categories, public.menu_products, public.menu_store_products to anon, authenticated;
 grant select on public.menu_admins to authenticated;
 grant all on public.menu_stores, public.menu_categories, public.menu_products, public.menu_store_products, public.menu_orders, public.menu_order_items to authenticated;
 revoke insert, update, delete on public.menu_orders, public.menu_order_items from anon;
 
--- Bucket público para fotos de produtos; somente admin pode gravar/apagar.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('menu-products', 'menu-products', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif'])
 on conflict (id) do update set public = excluded.public, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
@@ -188,7 +185,6 @@ drop policy if exists "menu_product_images_admin_delete" on storage.objects;
 create policy "menu_product_images_admin_delete" on storage.objects for delete to authenticated
 using (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins a where a.user_id = (select auth.uid())));
 
--- Duas unidades.
 insert into public.menu_stores (id, slug, name, short_name, address, whatsapp, delivery_fee, sort_order)
 values
   ('11111111-1111-4111-8111-111111111111', 'cidade-alta', 'Casa do Pão de Queijo — Cidade Alta', 'Cidade Alta', 'Cidade Alta — em frente à Farmácia Economize', '', 8.00, 1),
