@@ -38,12 +38,10 @@ export async function POST(request) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const secret = process.env.SUPABASE_SECRET_KEY;
 
-  // O pedido continua pelo WhatsApp mesmo antes de o banco ser conectado.
   if (!url || !secret) {
     return Response.json({ order_number: number, persisted: false });
   }
 
-  // Esta chave existe somente no runtime do servidor da Vercel e nunca vai ao navegador.
   const supabase = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
   const requestedItems = Array.isArray(payload.items) ? payload.items.filter((item) => item?.product_id && Number(item?.qty) > 0) : [];
   if (!payload.store_id || !requestedItems.length) return Response.json({ error: 'Pedido sem itens ou unidade.' }, { status: 400 });
@@ -90,10 +88,12 @@ export async function POST(request) {
   const deliveryFee = fulfillment === 'delivery' ? Number(store.delivery_fee || 0) : 0;
   const total = subtotal + deliveryFee;
   const orderId = crypto.randomUUID();
+  const trackingToken = crypto.randomUUID();
   const customer = payload.customer || {};
 
   const { error: orderError } = await supabase.from('menu_orders').insert({
     id: orderId,
+    public_token: trackingToken,
     order_number: number,
     store_id: store.id,
     customer_name: String(customer.name || '').slice(0, 120),
@@ -125,5 +125,5 @@ export async function POST(request) {
   );
 
   if (itemsError) console.error('menu_order_items insert:', itemsError.message);
-  return Response.json({ order_number: number, persisted: !itemsError });
+  return Response.json({ order_number: number, tracking_token: trackingToken, persisted: !itemsError });
 }
