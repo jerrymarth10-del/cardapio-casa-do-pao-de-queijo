@@ -1,0 +1,40 @@
+.trackingPage {
+  min-height: 100vh;
+  padding: 34px 16px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(244,163,0,.15), transparent 30%),
+    linear-gradient(160deg, #fffaf0, #f8f2e8);
+}
+.trackingCard {
+  width: min(620px, 100%);
+  border-radius: 28px;
+  background: white;
+  border: 1px solid rgba(71,45,21,.1);
+  box-shadow: 0 24px 70px rgba(77,45,12,.12);
+  padding: 26px;
+}
+.trackingCard h1 { margin: 8px 0 18px; font-size: clamp(28px, 6vw, 42px); letter-spacing: -.04em; }
+.trackingMeta { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.trackingMeta > div { padding: 14px; border-radius: 15px; background: #fff8e8; }
+.trackingMeta span { display: block; color: #7a6a5c; font-size: 11px; }
+.trackingMeta strong { display: block; margin-top: 4px; }
+.trackingAddress { display: flex; gap: 8px; align-items: center; padding: 11px 12px; border-radius: 13px; background: #f8f8f8; color: #695f58; font-size: 13px; }
+.trackingSteps { margin: 22px 0; position: relative; }
+.trackingStep { position: relative; display: grid; grid-template-columns: 34px 1fr; gap: 10px; min-height: 58px; color: #a39a93; }
+.trackingStep:not(:last-child)::after { content: ""; position: absolute; left: 11px; top: 26px; bottom: 3px; width: 2px; background: #e8e5e2; }
+.trackingStep.done { color: #2b241f; }
+.trackingStep.done:not(:last-child)::after { background: #f4a300; }
+.trackingIcon { position: relative; z-index: 1; background: white; color: #c9c2bc; }
+.trackingStep.done .trackingIcon { color: #d68800; }
+.trackingStep strong { display: block; padding-top: 2px; }
+.trackingStep span { display: inline-block; margin-top: 3px; font-size: 11px; color: #b16c00; font-weight: 750; }
+.trackingStep.current strong { color: #9a5b00; }
+.trackingFoot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; border-top: 1px solid rgba(71,45,21,.1); }
+.trackingFoot > span { color: #81756c; font-size: 11px; }
+@media (max-width: 520px) {
+  .trackingCard { padding: 20px; border-radius: 22px; }
+  .trackingMeta { grid-template-columns: 1fr; }
+  .trackingFoot { align-items: stretch; flex-direction: column; }
+}
