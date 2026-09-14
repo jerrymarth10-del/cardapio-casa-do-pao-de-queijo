@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   ChevronRight,
+  LocateFixed,
   MapPin,
   Minus,
   PackageCheck,
@@ -57,7 +58,13 @@ function ProductCard({ product, store, availability, onAdd }) {
     >
       <div className="productVisual">
         {product.image_url ? (
-          <Image src={product.image_url} alt={product.name} fill sizes="(max-width: 620px) 116px, (max-width: 900px) 50vw, 33vw" />
+          <Image
+            src={product.image_url}
+            alt={product.name}
+            fill
+            unoptimized={String(product.image_url).startsWith('data:')}
+            sizes="(max-width: 620px) 116px, (max-width: 900px) 50vw, 33vw"
+          />
         ) : (
           <span className="productEmoji" aria-hidden="true">{product.emoji || '🥐'}</span>
         )}
@@ -93,6 +100,7 @@ export default function MenuApp() {
   const [customBasePrice, setCustomBasePrice] = useState(0);
   const [selections, setSelections] = useState({});
   const [sending, setSending] = useState(false);
+  const [locating, setLocating] = useState(false);
   const [form, setForm] = useState({
     name: '', phone: '', fulfillment: 'pickup', street: '', neighborhood: '', number: '', complement: '', reference: '', location_url: '', payment_method: 'pix', notes: ''
   });
@@ -213,6 +221,26 @@ export default function MenuApp() {
       .filter((item) => item.qty > 0));
   }
 
+  function captureLocation() {
+    if (!navigator.geolocation) {
+      window.alert('Este navegador não disponibiliza localização. Você ainda pode colar o link manualmente.');
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setForm((f) => ({ ...f, location_url: `https://www.google.com/maps?q=${latitude},${longitude}` }));
+        setLocating(false);
+      },
+      () => {
+        setLocating(false);
+        window.alert('Não foi possível obter a localização. Verifique a permissão de localização do navegador.');
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+    );
+  }
+
   async function finishOrder(event) {
     event.preventDefault();
     if (!selectedStore || !cart.length || sending) return;
@@ -232,6 +260,7 @@ export default function MenuApp() {
 
     setSending(true);
     let orderNumber = '';
+    let trackingToken = '';
     try {
       const response = await fetch('/api/orders', {
         method: 'POST',
@@ -248,11 +277,13 @@ export default function MenuApp() {
       if (response.ok) {
         const saved = await response.json();
         orderNumber = saved.order_number || '';
+        trackingToken = saved.tracking_token || '';
       }
     } catch (error) {
       console.warn('Pedido seguirá apenas via WhatsApp:', error);
     }
 
+    const trackingUrl = trackingToken ? `${window.location.origin}/pedido/${trackingToken}` : '';
     const lines = [
       '🧀 *CASA DO PÃO DE QUEIJO*',
       `🏪 Unidade: *${selectedStore.short_name || selectedStore.name}*`,
@@ -274,12 +305,13 @@ export default function MenuApp() {
       form.fulfillment === 'delivery' ? `📍 ${form.street}, ${form.number} — ${form.neighborhood}${form.complement ? ` — ${form.complement}` : ''}` : `📍 Retirada: ${selectedStore.address}`,
       form.reference ? `Referência: ${form.reference}` : '',
       form.location_url ? `Localização: ${form.location_url}` : '',
-      form.notes ? `Observação: ${form.notes}` : ''
+      form.notes ? `Observação: ${form.notes}` : '',
+      trackingUrl ? `🔎 Acompanhar pedido: ${trackingUrl}` : ''
     ].filter(Boolean);
 
     const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
     setSending(false);
+    window.location.href = url;
   }
 
   const selectedOptionsPrice = customizing
@@ -442,7 +474,7 @@ export default function MenuApp() {
                     <div className="field"><label>Número *</label><input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} /></div>
                     <div className="field"><label>Complemento</label><input value={form.complement} onChange={(e) => setForm((f) => ({ ...f, complement: e.target.value }))} /></div>
                     <div className="field"><label>Ponto de referência</label><input value={form.reference} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))} /></div>
-                    <div className="field full"><label>Link da localização (opcional)</label><input placeholder="Cole aqui a localização compartilhada" value={form.location_url} onChange={(e) => setForm((f) => ({ ...f, location_url: e.target.value }))} /></div>
+                    <div className="field full"><label>Localização</label><input placeholder="Localização compartilhada" value={form.location_url} onChange={(e) => setForm((f) => ({ ...f, location_url: e.target.value }))} /><button type="button" className="btn btnGhost" onClick={captureLocation} disabled={locating} style={{ marginTop: 7 }}><LocateFixed size={16} /> {locating ? 'Obtendo localização...' : 'Usar minha localização'}</button></div>
                   </> : null}
 
                   <div className="field full"><label>Forma de pagamento</label><select value={form.payment_method} onChange={(e) => setForm((f) => ({ ...f, payment_method: e.target.value }))}><option value="pix">PIX</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão na entrega/retirada</option></select></div>
