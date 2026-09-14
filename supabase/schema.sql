@@ -110,13 +110,13 @@ begin
 end;
 $$;
 
- drop trigger if exists menu_stores_touch on public.menu_stores;
+drop trigger if exists menu_stores_touch on public.menu_stores;
 create trigger menu_stores_touch before update on public.menu_stores for each row execute function public.menu_touch_updated_at();
- drop trigger if exists menu_categories_touch on public.menu_categories;
+drop trigger if exists menu_categories_touch on public.menu_categories;
 create trigger menu_categories_touch before update on public.menu_categories for each row execute function public.menu_touch_updated_at();
- drop trigger if exists menu_products_touch on public.menu_products;
+drop trigger if exists menu_products_touch on public.menu_products;
 create trigger menu_products_touch before update on public.menu_products for each row execute function public.menu_touch_updated_at();
- drop trigger if exists menu_orders_touch on public.menu_orders;
+drop trigger if exists menu_orders_touch on public.menu_orders;
 create trigger menu_orders_touch before update on public.menu_orders for each row execute function public.menu_touch_updated_at();
 
 alter table public.menu_admins enable row level security;
@@ -142,11 +142,10 @@ create policy "menu_products_public_read" on public.menu_products for select to 
 drop policy if exists "menu_store_products_public_read" on public.menu_store_products;
 create policy "menu_store_products_public_read" on public.menu_store_products for select to anon, authenticated using (true);
 
--- Pedidos podem ser criados pelo público, mas nunca lidos pelo público.
+-- Nenhuma gravação de pedido é permitida diretamente pelo navegador.
+-- A rota /api/orders usa SUPABASE_SECRET_KEY somente no servidor da Vercel.
 drop policy if exists "menu_orders_public_insert" on public.menu_orders;
-create policy "menu_orders_public_insert" on public.menu_orders for insert to anon, authenticated with check (true);
 drop policy if exists "menu_order_items_public_insert" on public.menu_order_items;
-create policy "menu_order_items_public_insert" on public.menu_order_items for insert to anon, authenticated with check (true);
 
 -- Administração completa, protegida pela tabela menu_admins.
 do $$
@@ -166,26 +165,26 @@ end $$;
 -- Permissões da Data API. RLS continua sendo a barreira de autorização.
 grant usage on schema public to anon, authenticated;
 grant select on public.menu_stores, public.menu_categories, public.menu_products, public.menu_store_products to anon, authenticated;
-grant insert on public.menu_orders, public.menu_order_items to anon, authenticated;
 grant select on public.menu_admins to authenticated;
 grant all on public.menu_stores, public.menu_categories, public.menu_products, public.menu_store_products, public.menu_orders, public.menu_order_items to authenticated;
+revoke insert, update, delete on public.menu_orders, public.menu_order_items from anon;
 
 -- Bucket público para fotos de produtos; somente admin pode gravar/apagar.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('menu-products', 'menu-products', true, 5242880, array['image/jpeg','image/png','image/webp','image/avif'])
 on conflict (id) do update set public = excluded.public, file_size_limit = excluded.file_size_limit, allowed_mime_types = excluded.allowed_mime_types;
 
- drop policy if exists "menu_product_images_public_read" on storage.objects;
+drop policy if exists "menu_product_images_public_read" on storage.objects;
 create policy "menu_product_images_public_read" on storage.objects for select to anon, authenticated
 using (bucket_id = 'menu-products');
- drop policy if exists "menu_product_images_admin_insert" on storage.objects;
+drop policy if exists "menu_product_images_admin_insert" on storage.objects;
 create policy "menu_product_images_admin_insert" on storage.objects for insert to authenticated
 with check (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins a where a.user_id = (select auth.uid())));
- drop policy if exists "menu_product_images_admin_update" on storage.objects;
+drop policy if exists "menu_product_images_admin_update" on storage.objects;
 create policy "menu_product_images_admin_update" on storage.objects for update to authenticated
 using (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins a where a.user_id = (select auth.uid())))
 with check (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins a where a.user_id = (select auth.uid())));
- drop policy if exists "menu_product_images_admin_delete" on storage.objects;
+drop policy if exists "menu_product_images_admin_delete" on storage.objects;
 create policy "menu_product_images_admin_delete" on storage.objects for delete to authenticated
 using (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins a where a.user_id = (select auth.uid())));
 
