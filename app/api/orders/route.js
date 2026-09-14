@@ -36,13 +36,15 @@ export async function POST(request) {
 
   const number = orderNumber();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const secret = process.env.SUPABASE_SECRET_KEY;
 
-  if (!url || !key) {
+  // O pedido continua pelo WhatsApp mesmo antes de o banco ser conectado.
+  if (!url || !secret) {
     return Response.json({ order_number: number, persisted: false });
   }
 
-  const supabase = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  // Esta chave existe somente no runtime do servidor da Vercel e nunca vai ao navegador.
+  const supabase = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
   const requestedItems = Array.isArray(payload.items) ? payload.items.filter((item) => item?.product_id && Number(item?.qty) > 0) : [];
   if (!payload.store_id || !requestedItems.length) return Response.json({ error: 'Pedido sem itens ou unidade.' }, { status: 400 });
 
