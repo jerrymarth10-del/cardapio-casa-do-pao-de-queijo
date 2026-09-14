@@ -20,6 +20,8 @@ import { DEMO_CATALOG, money } from '@/lib/catalog';
 import { loadCatalog, productForStore } from '@/lib/catalog-service';
 
 const STORE_KEY = 'cpq_selected_store_v2';
+const DELIVERY_CITY = 'Rolim de Moura';
+const DELIVERY_STATE = 'RO';
 
 function normalizeOptions(options) {
   if (Array.isArray(options)) return options;
@@ -102,7 +104,20 @@ export default function MenuApp() {
   const [sending, setSending] = useState(false);
   const [locating, setLocating] = useState(false);
   const [form, setForm] = useState({
-    name: '', phone: '', fulfillment: 'pickup', street: '', neighborhood: '', number: '', complement: '', reference: '', location_url: '', payment_method: 'pix', notes: ''
+    name: '',
+    phone: '',
+    fulfillment: 'pickup',
+    street: '',
+    neighborhood: '',
+    number: '',
+    complement: '',
+    reference: '',
+    cep: '',
+    city: DELIVERY_CITY,
+    state: DELIVERY_STATE,
+    location_url: '',
+    payment_method: 'pix',
+    notes: ''
   });
 
   useEffect(() => {
@@ -223,7 +238,7 @@ export default function MenuApp() {
 
   function captureLocation() {
     if (!navigator.geolocation) {
-      window.alert('Este navegador não disponibiliza localização. Você ainda pode colar o link manualmente.');
+      window.alert('Este navegador não disponibiliza localização. O endereço continua suficiente para fazer o pedido.');
       return;
     }
     setLocating(true);
@@ -235,7 +250,7 @@ export default function MenuApp() {
       },
       () => {
         setLocating(false);
-        window.alert('Não foi possível obter a localização. Verifique a permissão de localização do navegador.');
+        window.alert('Não foi possível obter a localização. Você pode continuar normalmente usando somente o endereço.');
       },
       { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
     );
@@ -254,7 +269,7 @@ export default function MenuApp() {
     }
     const whatsapp = String(selectedStore.whatsapp || '').replace(/\D/g, '');
     if (!whatsapp) {
-      window.alert('O WhatsApp desta unidade ainda não foi configurado no painel administrativo.');
+      window.alert('O WhatsApp desta unidade ainda não foi configurado.');
       return;
     }
 
@@ -284,6 +299,7 @@ export default function MenuApp() {
     }
 
     const trackingUrl = trackingToken ? `${window.location.origin}/pedido/${trackingToken}` : '';
+    const deliveryAddress = `${form.street}, ${form.number} — ${form.neighborhood}${form.complement ? ` — ${form.complement}` : ''} — ${DELIVERY_CITY}/${DELIVERY_STATE}${form.cep ? ` — CEP ${form.cep}` : ''}`;
     const lines = [
       '🧀 *CASA DO PÃO DE QUEIJO*',
       `🏪 Unidade: *${selectedStore.short_name || selectedStore.name}*`,
@@ -302,10 +318,10 @@ export default function MenuApp() {
       `👤 ${form.name}`,
       `📱 ${form.phone}`,
       `💳 Pagamento: ${form.payment_method}`,
-      form.fulfillment === 'delivery' ? `📍 ${form.street}, ${form.number} — ${form.neighborhood}${form.complement ? ` — ${form.complement}` : ''}` : `📍 Retirada: ${selectedStore.address}`,
-      form.reference ? `Referência: ${form.reference}` : '',
-      form.location_url ? `Localização: ${form.location_url}` : '',
-      form.notes ? `Observação: ${form.notes}` : '',
+      form.fulfillment === 'delivery' ? `📍 Endereço: ${deliveryAddress}` : `📍 Retirada: ${selectedStore.address}`,
+      form.reference ? `🏠 Referência: ${form.reference}` : '',
+      form.location_url ? `🗺️ Localização GPS: ${form.location_url}` : '',
+      form.notes ? `📝 Observação: ${form.notes}` : '',
       trackingUrl ? `🔎 Acompanhar pedido: ${trackingUrl}` : ''
     ].filter(Boolean);
 
@@ -326,7 +342,7 @@ export default function MenuApp() {
             <div className="brandMark">🧀</div>
             <div className="brandText">
               <strong>Casa do Pão de Queijo</strong>
-              <span>{selectedStore?.short_name || 'Escolha sua unidade'}</span>
+              <span>{selectedStore?.short_name || 'Escolha sua unidade'} · Rolim de Moura</span>
             </div>
           </div>
           <div className="headerActions">
@@ -342,7 +358,7 @@ export default function MenuApp() {
             <div className="heroCopy">
               <span className="eyebrow"><PackageCheck size={14} /> pedido direto da loja</span>
               <h1>Quentinho, rápido e do seu jeito.</h1>
-              <p>Escolha sua unidade, monte o pedido e envie direto para o WhatsApp da loja certa.</p>
+              <p>Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.</p>
             </div>
             <div className="heroStat">
               <span className="bigEmoji">🥐</span>
@@ -380,7 +396,7 @@ export default function MenuApp() {
         <div className="sectionHead">
           <div><h2>Cardápio</h2><p>{products.length} opções disponíveis em {selectedStore?.short_name || 'sua unidade'}</p></div>
         </div>
-        {source === 'fallback' ? <div className="notice" style={{ marginBottom: 12 }}>O catálogo online não respondeu. Exibindo a versão local de segurança.</div> : null}
+        {source === 'fallback' ? <div className="notice" style={{ marginBottom: 12 }}>Exibindo a versão local do cardápio.</div> : null}
         {products.length ? (
           <div className="productGrid">
             {products.map((product) => <ProductCard key={product.id} product={product} store={selectedStore} availability={catalog.availability || []} onAdd={beginAdd} />)}
@@ -397,7 +413,7 @@ export default function MenuApp() {
       {storeGateOpen ? (
         <div className="storeGate">
           <div className="storeGateCard">
-            <span className="eyebrow" style={{ color: '#9a5b00' }}><Store size={14} /> duas unidades</span>
+            <span className="eyebrow" style={{ color: '#9a5b00' }}><Store size={14} /> duas unidades em Rolim de Moura</span>
             <h1>Onde você quer pedir?</h1>
             <p>Seu pedido será enviado automaticamente para o WhatsApp da unidade escolhida.</p>
             <div className="storeChoices">
@@ -465,23 +481,32 @@ export default function MenuApp() {
                 </div>
 
                 <div className="formGrid">
-                  <div className="field"><label>Nome *</label><input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></div>
-                  <div className="field"><label>WhatsApp *</label><input inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></div>
+                  <div className="field"><label>Nome *</label><input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} /></div>
+                  <div className="field"><label>WhatsApp *</label><input required inputMode="tel" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} /></div>
 
                   {form.fulfillment === 'delivery' ? <>
-                    <div className="field full"><label>Rua / Avenida *</label><input value={form.street} onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))} /></div>
-                    <div className="field"><label>Bairro *</label><input value={form.neighborhood} onChange={(e) => setForm((f) => ({ ...f, neighborhood: e.target.value }))} /></div>
-                    <div className="field"><label>Número *</label><input value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} /></div>
-                    <div className="field"><label>Complemento</label><input value={form.complement} onChange={(e) => setForm((f) => ({ ...f, complement: e.target.value }))} /></div>
-                    <div className="field"><label>Ponto de referência</label><input value={form.reference} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))} /></div>
-                    <div className="field full"><label>Localização</label><input placeholder="Localização compartilhada" value={form.location_url} onChange={(e) => setForm((f) => ({ ...f, location_url: e.target.value }))} /><button type="button" className="btn btnGhost" onClick={captureLocation} disabled={locating} style={{ marginTop: 7 }}><LocateFixed size={16} /> {locating ? 'Obtendo localização...' : 'Usar minha localização'}</button></div>
+                    <div className="field full"><label>Rua / Avenida *</label><input required placeholder="Ex.: Av. 25 de Agosto" value={form.street} onChange={(e) => setForm((f) => ({ ...f, street: e.target.value }))} /></div>
+                    <div className="field"><label>Bairro *</label><input required value={form.neighborhood} onChange={(e) => setForm((f) => ({ ...f, neighborhood: e.target.value }))} /></div>
+                    <div className="field"><label>Número *</label><input required inputMode="numeric" value={form.number} onChange={(e) => setForm((f) => ({ ...f, number: e.target.value }))} /></div>
+                    <div className="field"><label>Cidade / UF</label><input value={`${DELIVERY_CITY} - ${DELIVERY_STATE}`} readOnly /></div>
+                    <div className="field"><label>CEP (opcional)</label><input inputMode="numeric" placeholder="76940-000" value={form.cep} onChange={(e) => setForm((f) => ({ ...f, cep: e.target.value }))} /></div>
+                    <div className="field"><label>Complemento (opcional)</label><input placeholder="Apto, bloco, fundos..." value={form.complement} onChange={(e) => setForm((f) => ({ ...f, complement: e.target.value }))} /></div>
+                    <div className="field full"><label>Ponto de referência (opcional)</label><input placeholder="Ex.: próximo ao mercado..." value={form.reference} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))} /></div>
+                    <div className="field full">
+                      <label>Localização GPS (opcional)</label>
+                      <div className="notice" style={{ marginBottom: 8 }}>O endereço acima é obrigatório. A localização é opcional e só será usada se você tocar no botão e autorizar.</div>
+                      {form.location_url ? <div className="notice" style={{ marginBottom: 8 }}>✓ Localização adicionada ao pedido.</div> : null}
+                      <button type="button" className="btn btnGhost" onClick={captureLocation} disabled={locating}>
+                        <LocateFixed size={16} /> {locating ? 'Obtendo localização...' : form.location_url ? 'Atualizar minha localização' : 'Usar minha localização'}
+                      </button>
+                    </div>
                   </> : null}
 
                   <div className="field full"><label>Forma de pagamento</label><select value={form.payment_method} onChange={(e) => setForm((f) => ({ ...f, payment_method: e.target.value }))}><option value="pix">PIX</option><option value="dinheiro">Dinheiro</option><option value="cartao">Cartão na entrega/retirada</option></select></div>
-                  <div className="field full"><label>Observação</label><textarea placeholder="Ex.: retirar cebola, troco para R$ 50..." value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></div>
+                  <div className="field full"><label>Observação</label><textarea placeholder="Ex.: troco para R$ 50..." value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} /></div>
                 </div>
 
-                {!selectedStore?.whatsapp ? <div className="notice" style={{ marginTop: 12 }}>O administrador precisa cadastrar o WhatsApp desta unidade antes de receber pedidos.</div> : null}
+                {!selectedStore?.whatsapp ? <div className="notice" style={{ marginTop: 12 }}>O WhatsApp desta unidade precisa ser configurado antes de receber pedidos.</div> : null}
                 <button className="btn btnBrand" disabled={sending || !selectedStore?.whatsapp} style={{ width: '100%', minHeight: 52, marginTop: 14 }} type="submit">{sending ? 'Preparando pedido...' : 'Enviar pedido no WhatsApp'}</button>
               </form>
             ) : null}
