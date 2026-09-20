@@ -439,6 +439,7 @@ export default function MenuApp() {
       {storeGateOpen ? (
         <div className="storeGate">
           <div className="storeGateCard">
+            <div className="gateBrand"><MenuMedia source={BRAND_MEDIA.logo} alt="Casa do Pão de Queijo" priority sizes="72px" /></div>
             <span className="eyebrow" style={{ color: '#9a5b00' }}><Store size={14} /> duas unidades em Rolim de Moura</span>
             <h1>Onde você quer pedir?</h1>
             <p>Seu pedido será enviado automaticamente para o WhatsApp da unidade escolhida.</p>
