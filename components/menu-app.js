@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
@@ -17,6 +16,7 @@ import {
   X
 } from 'lucide-react';
 import { DEMO_CATALOG, money } from '@/lib/catalog';
+import { BRAND_MEDIA, getOptionImage, getProductMedia } from '@/lib/menu-media';
 import { loadCatalog, productForStore } from '@/lib/catalog-service';
 
 const STORE_KEY = 'cpq_selected_store_v2';
@@ -33,8 +33,41 @@ function normalizeOptions(options) {
   }
 }
 
+function MenuMedia({ source, alt = '', className = '' }) {
+  const [src, setSrc] = useState(source && !String(source).endsWith('.txt') ? source : '');
+
+  useEffect(() => {
+    let alive = true;
+    if (!source) {
+      setSrc('');
+      return () => { alive = false; };
+    }
+    if (!String(source).endsWith('.txt')) {
+      setSrc(source);
+      return () => { alive = false; };
+    }
+    setSrc('');
+    fetch(source)
+      .then((response) => {
+        if (!response.ok) throw new Error('Falha ao carregar foto');
+        return response.text();
+      })
+      .then((value) => {
+        if (alive) setSrc(value.trim());
+      })
+      .catch(() => {
+        if (alive) setSrc('');
+      });
+    return () => { alive = false; };
+  }, [source]);
+
+  if (!src) return <span className="mediaSkeleton" aria-hidden="true">🥐</span>;
+  return <img className={`menuMedia ${className}`} src={src} alt={alt} loading="lazy" decoding="async" />;
+}
+
 function ProductCard({ product, store, availability, onAdd }) {
   const storeProduct = productForStore(product, store, availability);
+  const media = getProductMedia(product);
   const disabled = !storeProduct.available;
 
   function tilt(event) {
@@ -59,17 +92,7 @@ function ProductCard({ product, store, availability, onAdd }) {
       onPointerLeave={reset}
     >
       <div className="productVisual">
-        {product.image_url ? (
-          <Image
-            src={product.image_url}
-            alt={product.name}
-            fill
-            unoptimized={String(product.image_url).startsWith('data:')}
-            sizes="(max-width: 620px) 116px, (max-width: 900px) 50vw, 33vw"
-          />
-        ) : (
-          <span className="productEmoji" aria-hidden="true">{product.emoji || '🥐'}</span>
-        )}
+        {media.image ? <MenuMedia source={media.image} alt={product.name} /> : <span className="productEmoji" aria-hidden="true">{product.emoji || '🥐'}</span>}
         {product.badge ? <span className="badge">{product.badge}</span> : null}
       </div>
       <div className="productBody">
@@ -101,6 +124,7 @@ export default function MenuApp() {
   const [customizing, setCustomizing] = useState(null);
   const [customBasePrice, setCustomBasePrice] = useState(0);
   const [selections, setSelections] = useState({});
+  const [customPreview, setCustomPreview] = useState('');
   const [sending, setSending] = useState(false);
   const [locating, setLocating] = useState(false);
   const [form, setForm] = useState({
@@ -185,17 +209,22 @@ export default function MenuApp() {
 
   function beginAdd(product, basePrice) {
     const options = normalizeOptions(product.options);
-    if (!options.length) {
+    const media = getProductMedia(product);
+    if (!options.length && media.gallery.length <= 1) {
       addToCart(product, basePrice, []);
       return;
     }
-    setCustomizing({ ...product, options });
-    setCustomBasePrice(basePrice);
     const initial = {};
     options.forEach((group) => {
       if (group.required && group.values?.length) initial[group.name] = group.values[0];
     });
+    const initialOptionImage = options
+      .map((group) => getOptionImage(product.id, group.name, initial[group.name]?.label))
+      .find(Boolean);
+    setCustomizing({ ...product, options, media });
+    setCustomBasePrice(basePrice);
     setSelections(initial);
+    setCustomPreview(initialOptionImage || media.image || '');
   }
 
   function addToCart(product, basePrice, selected) {
@@ -216,6 +245,7 @@ export default function MenuApp() {
       }];
     });
     setCustomizing(null);
+    setCustomPreview('');
   }
 
   function confirmCustom() {
@@ -339,7 +369,7 @@ export default function MenuApp() {
       <header className="topbar">
         <div className="container topbarInner">
           <div className="brand">
-            <div className="brandMark">🧀</div>
+            <div className="brandMark"><MenuMedia source={BRAND_MEDIA.logo} alt="Casa do Pão de Queijo" /></div>
             <div className="brandText">
               <strong>Casa do Pão de Queijo</strong>
               <span>{selectedStore?.short_name || 'Escolha sua unidade'} · Rolim de Moura</span>
@@ -360,10 +390,12 @@ export default function MenuApp() {
               <h1>Quentinho, rápido e do seu jeito.</h1>
               <p>Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.</p>
             </div>
-            <div className="heroStat">
-              <span className="bigEmoji">🥐</span>
-              <strong>Feito para pedir fácil</strong>
-              <span>Sem cadastro obrigatório e com retirada ou entrega.</span>
+            <div className="heroStat heroPhotoStat">
+              <div className="heroPhoto"><MenuMedia source={BRAND_MEDIA.fachada} alt="Casa do Pão de Queijo" /></div>
+              <div className="heroStatCopy">
+                <strong>Feito para pedir fácil</strong>
+                <span>Sem cadastro obrigatório e com retirada ou entrega.</span>
+              </div>
             </div>
           </div>
 
@@ -429,10 +461,27 @@ export default function MenuApp() {
       ) : null}
 
       {customizing ? (
-        <div className="modalWrap" onMouseDown={(e) => e.target === e.currentTarget && setCustomizing(null)}>
+        <div className="modalWrap" onMouseDown={(e) => {
+          if (e.target === e.currentTarget) {
+            setCustomizing(null);
+            setCustomPreview('');
+          }
+        }}>
           <div className="modal">
-            <div className="modalHead"><div><h2>{customizing.name}</h2><small>Personalize seu pedido</small></div><button className="btn btnGhost iconBtn" onClick={() => setCustomizing(null)}><X size={18} /></button></div>
+            <div className="modalHead"><div><h2>{customizing.name}</h2><small>Personalize seu pedido</small></div><button className="btn btnGhost iconBtn" onClick={() => { setCustomizing(null); setCustomPreview(''); }}><X size={18} /></button></div>
             <div className="modalBody">
+              {customPreview || customizing.media?.image ? (
+                <div className="customVisual"><MenuMedia source={customPreview || customizing.media?.image} alt={customizing.name} /></div>
+              ) : null}
+              {customizing.media?.gallery?.length > 1 ? (
+                <div className="customThumbs">
+                  {customizing.media.gallery.map((image, index) => (
+                    <button type="button" className={`customThumb ${(customPreview || customizing.media.image) === image ? 'active' : ''}`} key={`${image}-${index}`} onClick={() => setCustomPreview(image)} aria-label={`Ver foto ${index + 1}`}>
+                      <MenuMedia source={image} alt="" />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               {normalizeOptions(customizing.options).map((group) => (
                 <div className="optionGroup" key={group.name}>
                   <h4>{group.name} {group.required ? <small>· obrigatório</small> : null}</h4>
@@ -440,7 +489,11 @@ export default function MenuApp() {
                     {(group.values || []).map((value) => {
                       const active = selections[group.name]?.label === value.label;
                       return (
-                        <button key={value.label} className={`optionChoice ${active ? 'active' : ''}`} onClick={() => setSelections((s) => ({ ...s, [group.name]: value }))}>
+                        <button key={value.label} className={`optionChoice ${active ? 'active' : ''}`} onClick={() => {
+                          setSelections((current) => ({ ...current, [group.name]: value }));
+                          const image = getOptionImage(customizing.id, group.name, value.label);
+                          if (image) setCustomPreview(image);
+                        }}>
                           <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
                           <strong>{Number(value.price_delta || 0) ? `+ ${money(value.price_delta)}` : ''}</strong>
                         </button>
