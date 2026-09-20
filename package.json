@@ -3,7 +3,9 @@
   "version": "2.0.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/prepare-menu-assets.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/prepare-menu-assets.mjs",
     "build": "next build",
     "start": "next start"
   },
