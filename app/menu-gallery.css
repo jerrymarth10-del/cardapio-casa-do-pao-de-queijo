@@ -1,0 +1,19 @@
+/* Fotos do cardápio antigo integradas ao visual premium. */
+.shell .menuMedia{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.05) contrast(1.035) brightness(1.01);transition:transform .35s,filter .35s}
+.shell .productCard:hover .menuMedia{transform:scale(1.085);filter:saturate(1.08) contrast(1.045) brightness(1.025)}
+.shell .brandMark{overflow:hidden;position:relative;padding:0}
+.shell .brandMark .menuMedia{object-fit:cover;transform:scale(1.05)}
+.shell .heroPhotoStat{overflow:hidden;padding:0;display:block}
+.shell .heroPhotoStat:after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(33,18,8,.02),rgba(33,18,8,.78));z-index:1}
+.shell .heroPhoto{position:absolute;inset:0}.shell .heroPhoto .menuMedia{object-fit:cover;transform:scale(1.04)}
+.shell .heroStatCopy{position:absolute;left:20px;right:20px;bottom:18px;z-index:2;display:grid;gap:5px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.42)}
+.shell .heroStatCopy strong{font-size:21px}.shell .heroStatCopy span{font-size:13px;color:rgba(255,255,255,.82)}
+.shell .customVisual{position:relative;height:240px;border-radius:20px;overflow:hidden;background:#f5e7cf;margin-bottom:12px;box-shadow:inset 0 0 0 1px rgba(72,41,17,.08)}
+.shell .customVisual .menuMedia{object-fit:cover}
+.shell .customThumbs{display:flex;gap:8px;overflow:auto;padding:2px 1px 10px;scrollbar-width:none}.shell .customThumbs::-webkit-scrollbar{display:none}
+.shell .customThumb{position:relative;flex:0 0 66px;width:66px;height:52px;border-radius:11px;overflow:hidden;border:2px solid transparent;background:#f3eadf;padding:0;cursor:pointer}
+.shell .customThumb.active{border-color:#f3a20b;box-shadow:0 5px 14px rgba(210,125,0,.18)}.shell .customThumb .menuMedia{object-fit:cover}
+.shell .mediaSkeleton{width:100%;height:100%;display:grid;place-items:center;background:linear-gradient(110deg,#f6ead7 25%,#fff8ed 40%,#f6ead7 55%);background-size:200% 100%;animation:menuShimmer 1.25s linear infinite;color:#a47e57;font-size:24px}
+@keyframes menuShimmer{to{background-position:-200% 0}}
+@media(max-width:680px){.shell .customVisual{height:190px}.shell .heroStatCopy{left:14px;right:14px;bottom:13px}.shell .heroStatCopy strong{font-size:14px}.shell .heroStatCopy span{display:none}}
+@media(prefers-reduced-motion:reduce){.shell .menuMedia{transition:none}.shell .mediaSkeleton{animation:none}}
