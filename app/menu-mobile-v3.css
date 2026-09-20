@@ -509,3 +509,6 @@
     transform:none !important;
   }
 }
+
+/* Native touch polish */
+.shell button,.shell .productCard{-webkit-tap-highlight-color:transparent;}
