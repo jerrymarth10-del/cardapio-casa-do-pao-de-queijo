@@ -1,6 +1,6 @@
 /* Fotos do cardápio antigo integradas ao visual premium. */
-.shell .menuMedia{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.05) contrast(1.035) brightness(1.01);transition:transform .35s,filter .35s}
-.shell .productCard:hover .menuMedia{transform:scale(1.085);filter:saturate(1.08) contrast(1.045) brightness(1.025)}
+.shell .menuMedia{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.075) contrast(1.045) brightness(1.015) sepia(.018);transition:transform .35s,filter .35s}
+.shell .productCard:hover .menuMedia{transform:scale(1.07);filter:saturate(1.1) contrast(1.055) brightness(1.025) sepia(.025)}
 .shell .brandMark{overflow:hidden;position:relative;padding:0}
 .shell .brandMark .menuMedia{object-fit:cover;transform:scale(1.05)}
 .shell .heroPhotoStat{overflow:hidden;padding:0;display:block}
@@ -17,3 +17,18 @@
 @keyframes menuShimmer{to{background-position:-200% 0}}
 @media(max-width:680px){.shell .customVisual{height:190px}.shell .heroStatCopy{left:14px;right:14px;bottom:13px}.shell .heroStatCopy strong{font-size:14px}.shell .heroStatCopy span{display:none}}
 @media(prefers-reduced-motion:reduce){.shell .menuMedia{transition:none}.shell .mediaSkeleton{animation:none}}
+
+.shell .brandMark .menuMedia{filter:none!important}
+.shell .heroPhoto .menuMedia{filter:saturate(1.06) contrast(1.07) brightness(.97) sepia(.025)}
+.shell .productVisual{isolation:isolate}
+.shell .productVisual:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 28% 12%,rgba(255,230,176,.13),transparent 30%),
+    linear-gradient(180deg,rgba(255,255,255,.015),rgba(54,25,7,.055));
+  mix-blend-mode:soft-light;
+}
