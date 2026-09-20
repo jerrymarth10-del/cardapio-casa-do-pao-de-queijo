@@ -213,7 +213,7 @@ export default function MenuApp() {
       if (group.required && group.values?.length) initial[group.name] = group.values[0];
     });
     const initialOptionImage = options
-      .map((group) => getOptionImage(product.id, group.name, initial[group.name]?.label))
+      .map((group) => getOptionImage(product, group.name, initial[group.name]?.label))
       .find(Boolean);
     setCustomizing({ ...product, options, media });
     setCustomBasePrice(basePrice);
@@ -486,7 +486,7 @@ export default function MenuApp() {
                       return (
                         <button key={value.label} className={`optionChoice ${active ? 'active' : ''}`} onClick={() => {
                           setSelections((current) => ({ ...current, [group.name]: value }));
-                          const image = getOptionImage(customizing.id, group.name, value.label);
+                          const image = getOptionImage(customizing, group.name, value.label);
                           if (image) setCustomPreview(image);
                         }}>
                           <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
