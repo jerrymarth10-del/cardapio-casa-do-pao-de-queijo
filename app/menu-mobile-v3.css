@@ -84,12 +84,14 @@
   font-weight:850;
   transition:transform .14s ease,box-shadow .14s ease,background .14s ease;
 }
-.shell .addBtn::after{content:"Adicionar";}
+.shell .addBtn span{
+  display:inline-block;
+  line-height:1;
+}
 .shell .addBtn:hover{
   transform:translateY(-2px);
   box-shadow:0 13px 26px rgba(36,24,14,.24);
 }
-.shell .addBtn:disabled::after{content:"Indisponível";}
 
 /* Navigation and categories */
 .shell .toolbar{
@@ -512,3 +514,43 @@
 
 /* Native touch polish */
 .shell button,.shell .productCard{-webkit-tap-highlight-color:transparent;}
+
+/* Brand polish */
+.shell .gateBrand{
+  width:72px;
+  height:72px;
+  position:relative;
+  overflow:hidden;
+  border-radius:22px;
+  margin-bottom:14px;
+  background:linear-gradient(145deg,#ffd45e,#f4a30b);
+  box-shadow:0 16px 36px rgba(130,72,6,.18);
+  border:1px solid rgba(113,64,10,.12);
+}
+.shell .gateBrand .menuMedia{
+  object-fit:cover;
+  filter:none;
+}
+.shell .storeChoice{
+  position:relative;
+  isolation:isolate;
+}
+.shell .storeChoice::after{
+  content:"→";
+  position:absolute;
+  right:16px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:999px;
+  background:#fff3d8;
+  color:#7b4b00;
+  font-weight:900;
+}
+.shell .storeChoice strong,
+.shell .storeChoice span{
+  padding-right:44px;
+}
