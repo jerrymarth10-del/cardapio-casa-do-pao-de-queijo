@@ -1,0 +1,511 @@
+/* Mobile-first polish v3 for the public menu.
+   Loaded last so it intentionally resolves legacy responsive conflicts. */
+
+.shell{
+  --menu-surface:#fffdf9;
+  --menu-card:#ffffff;
+  --menu-ink:#2b190f;
+  --menu-muted:#79695b;
+  --menu-gold:#f4a30b;
+  --menu-gold-soft:#ffd15a;
+  --menu-line:rgba(69,42,21,.10);
+}
+
+/* A calmer, more premium product rhythm */
+.shell .productGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:20px;
+  align-items:stretch;
+}
+.shell .productCard{
+  min-width:0;
+  border-radius:26px;
+  background:rgba(255,255,255,.97);
+  border:1px solid var(--menu-line);
+  box-shadow:0 14px 38px rgba(63,36,15,.09);
+  overflow:hidden;
+}
+.shell .productVisual{
+  width:100%;
+  height:auto;
+  aspect-ratio:16/10;
+}
+.shell .productVisual::after{
+  content:"";
+  position:absolute;
+  inset:auto 0 0;
+  height:34%;
+  pointer-events:none;
+  background:linear-gradient(180deg,transparent,rgba(35,19,8,.08));
+}
+.shell .productBody{
+  display:flex;
+  flex-direction:column;
+  padding:18px 18px 17px;
+  min-height:174px;
+}
+.shell .productBody h3{
+  margin:0 0 7px;
+  font-size:19px;
+  line-height:1.16;
+  letter-spacing:-.025em;
+}
+.shell .productBody p{
+  margin:0;
+  min-height:40px;
+  font-size:13px;
+  line-height:1.48;
+  color:var(--menu-muted);
+}
+.shell .productFoot{
+  margin-top:auto;
+  padding-top:16px;
+  align-items:center;
+}
+.shell .price{
+  font-size:21px;
+  line-height:1;
+}
+.shell .price small{
+  margin-top:4px;
+  font-size:10px;
+}
+.shell .addBtn{
+  width:auto;
+  min-width:112px;
+  height:44px;
+  padding:0 14px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  border-radius:14px;
+  font-size:12px;
+  font-weight:850;
+  transition:transform .14s ease,box-shadow .14s ease,background .14s ease;
+}
+.shell .addBtn::after{content:"Adicionar";}
+.shell .addBtn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 13px 26px rgba(36,24,14,.24);
+}
+.shell .addBtn:disabled::after{content:"Indisponível";}
+
+/* Navigation and categories */
+.shell .toolbar{
+  padding-top:12px;
+}
+.shell .categoryRow{
+  gap:10px;
+  padding:11px 1px 10px;
+  scroll-snap-type:x proximity;
+  overscroll-behavior-inline:contain;
+}
+.shell .categoryBtn{
+  scroll-snap-align:start;
+  min-height:42px;
+  padding:0 15px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  font-size:13px;
+  box-shadow:0 6px 18px rgba(65,39,18,.04);
+}
+.shell .categoryBtn.active{
+  box-shadow:0 10px 22px rgba(222,132,0,.18);
+}
+.shell .sectionHead{
+  margin:26px 0 16px;
+}
+.shell .sectionHead h2{
+  font-size:34px;
+}
+.shell .sectionHead p{
+  font-size:14px;
+}
+
+/* Store cards feel selectable without taking over the page */
+.shell .storeStrip{
+  scroll-snap-type:x proximity;
+  overscroll-behavior-inline:contain;
+}
+.shell .storePill{
+  position:relative;
+}
+.shell .storePill.active::after{
+  content:"Selecionada";
+  position:absolute;
+  right:12px;
+  top:10px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#2b190f;
+  color:#fff;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.03em;
+  text-transform:uppercase;
+}
+
+/* Cart CTA */
+.shell .cartFloat{
+  min-height:60px;
+  border:1px solid rgba(255,255,255,.08);
+}
+.shell .cartFloat:active{
+  transform:scale(.985);
+}
+
+/* Mid-size screens */
+@media (max-width:960px) and (min-width:681px){
+  .shell .productGrid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+  }
+}
+
+/* Phone layout: one complete card per row, no squeezed horizontal cards */
+@media (max-width:680px){
+  .shell{
+    background:
+      radial-gradient(circle at 8% 0,rgba(255,190,50,.15),transparent 24rem),
+      linear-gradient(180deg,#fffaf3,#fff7ea 66%,#fffaf4);
+  }
+
+  .shell .container{
+    width:min(calc(100% - 24px),1220px);
+  }
+
+  .shell .topbar,
+  .shell .topbarInner{
+    min-height:68px;
+  }
+  .shell .topbar{
+    background:rgba(255,250,243,.94);
+    border-bottom:1px solid rgba(69,42,21,.07);
+    box-shadow:0 6px 20px rgba(58,32,12,.05);
+  }
+  .shell .brand{
+    gap:9px;
+  }
+  .shell .brandMark{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+  }
+  .shell .brandText strong{
+    font-size:14px;
+    max-width:180px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .shell .brandText span{
+    max-width:180px;
+    font-size:10px;
+  }
+  .shell .headerActions{
+    gap:7px;
+  }
+  .shell .headerActions .btn{
+    min-height:42px;
+  }
+
+  /* Hero is compact instead of consuming most of the first screen */
+  .shell .hero{
+    padding:14px 0 10px;
+  }
+  .shell .heroCard{
+    min-height:272px;
+    display:block;
+    padding:24px 20px 112px;
+    border-radius:26px;
+    box-shadow:0 20px 45px rgba(70,38,12,.17);
+  }
+  .shell .hero h1{
+    max-width:315px;
+    margin-top:9px;
+    font-size:clamp(34px,10vw,43px);
+    line-height:.96;
+  }
+  .shell .hero p{
+    max-width:320px;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .shell .heroStat{
+    display:block;
+    position:absolute;
+    width:116px;
+    height:90px;
+    min-height:0;
+    right:14px;
+    bottom:13px;
+    padding:0;
+    border-radius:18px;
+    overflow:hidden;
+    transform:perspective(700px) rotateY(-5deg) rotateX(2deg);
+  }
+  .shell .heroStatCopy{
+    left:10px;
+    right:10px;
+    bottom:9px;
+  }
+  .shell .heroStatCopy strong{
+    font-size:11px;
+    line-height:1.15;
+  }
+  .shell .heroStatCopy span{
+    display:none;
+  }
+
+  /* Units become a compact swipe row */
+  .shell .storeStrip{
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+    margin-top:12px;
+    padding:2px 1px 6px;
+    scrollbar-width:none;
+  }
+  .shell .storeStrip::-webkit-scrollbar{display:none;}
+  .shell .storePill{
+    flex:0 0 84%;
+    min-height:76px;
+    border-radius:18px;
+    padding:14px 14px;
+    scroll-snap-align:start;
+  }
+  .shell .storePill strong{
+    padding-right:72px;
+    font-size:14px;
+  }
+  .shell .storePill span{
+    display:block;
+    padding-right:6px;
+    font-size:11px;
+  }
+
+  /* Sticky menu controls remain readable */
+  .shell .toolbar{
+    top:68px;
+    padding:10px 0 2px;
+    background:linear-gradient(rgba(255,249,240,.98) 78%,rgba(255,249,240,0));
+    backdrop-filter:blur(14px);
+  }
+  .shell .searchBox{
+    min-height:46px;
+    border-radius:15px;
+    padding:0 13px;
+    box-shadow:0 8px 22px rgba(67,39,16,.06);
+  }
+  .shell .searchBox input{
+    font-size:14px;
+  }
+  .shell .categoryRow{
+    margin-right:-12px;
+    padding:9px 12px 10px 1px;
+    gap:8px;
+  }
+  .shell .categoryBtn{
+    min-height:40px;
+    padding:0 13px;
+    font-size:12px;
+  }
+
+  .shell .sectionHead{
+    margin:20px 0 13px;
+  }
+  .shell .sectionHead h2{
+    font-size:29px;
+    letter-spacing:-.04em;
+  }
+  .shell .sectionHead p{
+    margin-top:4px;
+    font-size:12px;
+  }
+
+  /* Critical fix for the broken screenshot:
+     one vertical card per row, image above, text below. */
+  .shell .productGrid{
+    grid-template-columns:1fr !important;
+    gap:16px !important;
+    padding-bottom:118px;
+  }
+  .shell .productCard{
+    display:block !important;
+    min-height:0 !important;
+    border-radius:24px;
+    box-shadow:0 13px 32px rgba(66,38,16,.09);
+    transform:none !important;
+    transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease !important;
+  }
+  .shell .productVisual{
+    width:100%;
+    height:auto !important;
+    min-height:0 !important;
+    aspect-ratio:16/10;
+    border-radius:0;
+  }
+  .shell .productVisual img,
+  .shell .productVisual .menuMedia{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .shell .badge{
+    top:12px;
+    left:12px;
+    padding:7px 10px;
+    font-size:10px;
+  }
+  .shell .productBody{
+    display:flex;
+    flex-direction:column;
+    min-height:170px;
+    padding:17px 17px 16px;
+    transform:none;
+  }
+  .shell .productBody h3{
+    display:block;
+    min-height:0;
+    margin:0 0 7px;
+    overflow:visible;
+    font-size:20px;
+    line-height:1.13;
+    -webkit-line-clamp:unset;
+  }
+  .shell .productBody p{
+    min-height:0;
+    font-size:13px;
+    line-height:1.5;
+  }
+  .shell .productFoot{
+    margin-top:auto;
+    padding-top:15px;
+  }
+  .shell .price{
+    font-size:22px;
+  }
+  .shell .price small{
+    margin-top:4px;
+    font-size:10px;
+  }
+  .shell .addBtn{
+    width:auto;
+    min-width:118px;
+    height:46px;
+    padding:0 15px;
+    border-radius:14px;
+    font-size:12px;
+  }
+
+  /* Touch feedback replaces desktop hover */
+  .shell .productCard:active{
+    transform:perspective(700px) rotateX(1.2deg) scale(.988) translateY(-2px) !important;
+    border-color:rgba(239,151,10,.24);
+    box-shadow:0 20px 42px rgba(66,38,16,.14);
+  }
+  .shell .productCard:active .menuMedia{
+    transform:scale(1.035);
+  }
+  .shell .addBtn:active,
+  .shell .categoryBtn:active,
+  .shell .storePill:active{
+    transform:scale(.975);
+  }
+
+  /* Better mobile product customizer: bottom sheet */
+  .shell .modalWrap{
+    align-items:end;
+    padding:0;
+  }
+  .shell .modal{
+    width:100%;
+    max-height:92dvh;
+    border-radius:28px 28px 0 0;
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+  }
+  .shell .modalHead{
+    padding:18px 18px 9px;
+  }
+  .shell .modalBody{
+    padding:8px 18px 20px;
+  }
+  .shell .customVisual{
+    height:auto;
+    aspect-ratio:16/10;
+    border-radius:18px;
+  }
+  .shell .customThumb{
+    flex-basis:72px;
+    width:72px;
+    height:58px;
+  }
+
+  .shell .cartFloat{
+    left:12px;
+    right:12px;
+    bottom:max(12px,env(safe-area-inset-bottom));
+    width:calc(100% - 24px);
+    min-height:60px;
+    padding:0 16px;
+    justify-content:center;
+    border-radius:18px;
+    font-size:14px;
+  }
+
+  .shell .storeGate{
+    padding:14px;
+  }
+  .shell .storeGateCard{
+    border-radius:26px;
+    padding:22px 18px;
+  }
+  .shell .storeGateCard h1{
+    font-size:34px;
+  }
+  .shell .storeChoices{
+    grid-template-columns:1fr;
+  }
+  .shell .storeChoice{
+    min-height:86px;
+    padding:15px;
+  }
+}
+
+@media (max-width:390px){
+  .shell .brandText strong,
+  .shell .brandText span{
+    max-width:145px;
+  }
+  .shell .heroCard{
+    padding-left:18px;
+    padding-right:18px;
+  }
+  .shell .hero h1{
+    font-size:34px;
+  }
+  .shell .productBody{
+    padding:15px;
+  }
+  .shell .addBtn{
+    min-width:106px;
+    padding:0 12px;
+  }
+}
+
+/* Keep animation respectful, but preserve the static improved layout. */
+@media (prefers-reduced-motion:reduce){
+  .shell .productCard,
+  .shell .addBtn,
+  .shell .categoryBtn,
+  .shell .storePill,
+  .shell .menuMedia{
+    transition:none !important;
+  }
+  .shell .productCard:active{
+    transform:none !important;
+  }
+}
