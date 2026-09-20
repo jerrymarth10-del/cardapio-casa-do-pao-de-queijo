@@ -3,6 +3,7 @@ name: Verify Cardapio V2
 on:
   push:
     branches:
+      - main
       - upgrade-cardapio-v2
   pull_request:
     branches:
