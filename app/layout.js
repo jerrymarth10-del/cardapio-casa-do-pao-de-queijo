@@ -1,5 +1,6 @@
 import './globals.css';
 import './menu-premium.css';
+import './menu-gallery.css';
 
 export const metadata = {
   title: 'Casa do Pão de Queijo | Cardápio',
