@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
@@ -33,36 +34,28 @@ function normalizeOptions(options) {
   }
 }
 
-function MenuMedia({ source, alt = '', className = '' }) {
-  const [src, setSrc] = useState(source && !String(source).endsWith('.txt') ? source : '');
+function MenuMedia({ source, alt = '', className = '', priority = false, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw' }) {
+  const [failed, setFailed] = useState(false);
+  const src = failed ? '' : source;
 
   useEffect(() => {
-    let alive = true;
-    if (!source) {
-      setSrc('');
-      return () => { alive = false; };
-    }
-    if (!String(source).endsWith('.txt')) {
-      setSrc(source);
-      return () => { alive = false; };
-    }
-    setSrc('');
-    fetch(source)
-      .then((response) => {
-        if (!response.ok) throw new Error('Falha ao carregar foto');
-        return response.text();
-      })
-      .then((value) => {
-        if (alive) setSrc(value.trim());
-      })
-      .catch(() => {
-        if (alive) setSrc('');
-      });
-    return () => { alive = false; };
+    setFailed(false);
   }, [source]);
 
   if (!src) return <span className="mediaSkeleton" aria-hidden="true">🥐</span>;
-  return <img className={`menuMedia ${className}`} src={src} alt={alt} loading="lazy" decoding="async" />;
+
+  return (
+    <Image
+      className={`menuMedia ${className}`}
+      src={src}
+      alt={alt}
+      fill
+      sizes={sizes}
+      quality={88}
+      priority={priority}
+      onError={() => setFailed(true)}
+    />
+  );
 }
 
 function ProductCard({ product, store, availability, onAdd }) {
@@ -103,8 +96,9 @@ function ProductCard({ product, store, availability, onAdd }) {
             {money(storeProduct.price)}
             {normalizeOptions(product.options).length ? <small>a partir de</small> : null}
           </div>
-          <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price)} aria-label={`Adicionar ${product.name}`}>
-            {disabled ? <X size={18} /> : <Plus size={20} />}
+          <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price)} aria-label={disabled ? `${product.name} indisponível` : `Adicionar ${product.name}`}>
+            {disabled ? <X size={18} /> : <Plus size={18} />}
+            <span>{disabled ? 'Indisponível' : 'Adicionar'}</span>
           </button>
         </div>
       </div>
@@ -369,7 +363,7 @@ export default function MenuApp() {
       <header className="topbar">
         <div className="container topbarInner">
           <div className="brand">
-            <div className="brandMark"><MenuMedia source={BRAND_MEDIA.logo} alt="Casa do Pão de Queijo" /></div>
+            <div className="brandMark"><MenuMedia source={BRAND_MEDIA.logo} alt="Casa do Pão de Queijo" priority sizes="54px" /></div>
             <div className="brandText">
               <strong>Casa do Pão de Queijo</strong>
               <span>{selectedStore?.short_name || 'Escolha sua unidade'} · Rolim de Moura</span>
@@ -391,7 +385,7 @@ export default function MenuApp() {
               <p>Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.</p>
             </div>
             <div className="heroStat heroPhotoStat">
-              <div className="heroPhoto"><MenuMedia source={BRAND_MEDIA.fachada} alt="Casa do Pão de Queijo" /></div>
+              <div className="heroPhoto"><MenuMedia source={BRAND_MEDIA.fachada} alt="Casa do Pão de Queijo" priority sizes="(max-width: 680px) 116px, 320px" /></div>
               <div className="heroStatCopy">
                 <strong>Feito para pedir fácil</strong>
                 <span>Sem cadastro obrigatório e com retirada ou entrega.</span>
