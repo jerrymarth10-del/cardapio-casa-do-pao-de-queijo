@@ -1,0 +1,271 @@
+/* Revisão mobile-first — fundo branco e cards em sequência */
+:root{color-scheme:light}
+body{background:#fff!important;color:#22170f!important}
+.shell{
+  --mobile-orange:#f47a18;
+  --mobile-orange-2:#ff9a24;
+  --mobile-ink:#24180f;
+  --mobile-muted:#847a73;
+  --mobile-line:#eee7e1;
+  --mobile-surface:#fff;
+  --mobile-soft:#fff8f2;
+  background:#fff!important;
+  color:var(--mobile-ink)!important;
+}
+.shell .topbar{
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid var(--mobile-line)!important;
+  box-shadow:0 3px 16px rgba(49,32,21,.06)!important
+}
+.shell .brandText strong{color:#20150f!important}
+.shell .brandText span{color:#8b817a!important}
+.shell .btnGhost{background:#fff!important;color:#2a1c14!important;border-color:#e9e1db!important}
+.shell .btnPrimary,.shell .btnBrand,.shell .addBtn,.shell .categoryBtn.active,.shell .pwaInstallButton{
+  background:linear-gradient(135deg,var(--mobile-orange-2),var(--mobile-orange))!important;
+  color:#fff!important;
+  border-color:transparent!important
+}
+
+/* Hero claro, com as imagens ainda em destaque */
+.shell .hero{background:#fff!important;padding-top:10px!important}
+.shell .heroCard.heroCarousel{
+  border-radius:22px!important;
+  border:1px solid #eadfd7!important;
+  box-shadow:0 10px 28px rgba(48,31,20,.08)!important
+}
+.shell .heroShade{
+  background:linear-gradient(90deg,rgba(24,14,8,.72),rgba(24,14,8,.22) 58%,rgba(24,14,8,.03))!important
+}
+.shell .heroCarouselCopy .eyebrow{
+  color:#fff!important;background:rgba(0,0,0,.16)!important;border-color:rgba(255,255,255,.22)!important
+}
+.shell .heroCarouselCopy h1,.shell .heroCarouselCopy p{color:#fff!important}
+
+/* Lojas */
+.shell .storePill{
+  background:#fff!important;
+  border-color:#ece5df!important;
+  box-shadow:0 5px 18px rgba(45,30,20,.05)!important;
+  color:#22170f!important
+}
+.shell .storePill strong{color:#22170f!important}
+.shell .storePill span{color:#8a817a!important}
+.shell .storePill.active{
+  background:#fffaf6!important;
+  border-color:#f09043!important;
+  box-shadow:0 0 0 1px rgba(244,122,24,.08) inset!important
+}
+
+/* Busca e categorias */
+.shell .toolbar{
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid #eee7e1!important
+}
+.shell .searchBox{
+  background:#fff!important;color:#2a1c14!important;border-color:#e9e1db!important;
+  box-shadow:0 4px 14px rgba(45,30,20,.04)!important
+}
+.shell .searchBox input{color:#24180f!important}
+.shell .searchBox input::placeholder{color:#9a918b!important}
+.shell .categoryBtn{
+  background:#f8f4f1!important;color:#33241b!important;border-color:#eee7e1!important
+}
+.shell .categoryBtn.active{box-shadow:0 7px 18px rgba(244,122,24,.16)!important}
+
+/* Seções */
+.shell .menuOverview h2,.shell .categorySectionHead h3{color:#20150f!important}
+.shell .menuOverview p,.shell .categorySectionHead>span:last-child{color:#90867f!important}
+.shell .categorySectionHead{border-bottom-color:#eee7e1!important}
+.shell .categoryAccent{background:linear-gradient(180deg,#ff9b27,#ef6f13)!important}
+
+/* Cards desktop claros */
+.shell .productCard{
+  background:#fff!important;
+  border:1px solid #eee7e1!important;
+  box-shadow:0 7px 20px rgba(46,31,20,.06)!important;
+  color:#21160f!important
+}
+.shell .productBody{background:#fff!important}
+.shell .productBody h3{color:#21160f!important}
+.shell .productBody p{color:#8c827b!important}
+.shell .price{color:#d85a08!important}
+.shell .price small{color:#9c938c!important}
+.shell .badge{background:rgba(255,255,255,.92)!important;color:#b94a00!important;border-color:#f3c8aa!important}
+
+/* Modais/carrinho */
+.shell .drawer,.shell .modal,.shell .storeGateCard{
+  background:#fff!important;color:#21160f!important;border-color:#e9e1db!important
+}
+.shell .drawer h2,.shell .modal h2,.shell .storeGateCard h1{color:#21160f!important}
+.shell .drawer p,.shell .modal p,.shell .storeGateCard p{color:#8d827a!important}
+.shell input,.shell select,.shell textarea{background:#fff!important;color:#24180f!important;border-color:#e7ded8!important}
+.shell .summary{background:#fff7ef!important;border-color:#f3ddc7!important}
+.shell .optionChoice{background:#fff!important;border-color:#e9e1db!important;color:#25180f!important}
+.shell .optionChoice.active{background:#fff6ed!important;border-color:#f18b39!important}
+
+/* convite PWA */
+.shell .pwaInstall{
+  position:fixed;
+  left:14px;
+  bottom:14px;
+  z-index:58;
+  width:min(370px,calc(100vw - 28px));
+  min-height:72px;
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:11px 12px;
+  border:1px solid #eadfd7;
+  border-radius:18px;
+  background:rgba(255,255,255,.98);
+  box-shadow:0 14px 34px rgba(46,30,19,.16);
+  backdrop-filter:blur(12px)
+}
+.shell .pwaDismiss{
+  position:absolute;top:-7px;right:-7px;
+  width:26px;height:26px;border-radius:50%;
+  border:1px solid #e7ded7;background:#fff;color:#66584f;
+  display:grid;place-items:center;box-shadow:0 4px 10px rgba(0,0,0,.08)
+}
+.shell .pwaInstallIcon{
+  width:42px;height:42px;border-radius:13px;
+  display:grid;place-items:center;background:#fff2e6;color:#e5660d
+}
+.shell .pwaInstallCopy{display:flex;flex-direction:column;gap:2px;min-width:0}
+.shell .pwaInstallCopy strong{font-size:13px;color:#23170f}
+.shell .pwaInstallCopy span{font-size:11px;line-height:1.3;color:#887d76}
+.shell .pwaInstallButton{
+  min-height:38px;padding:0 12px;border:0;border-radius:12px;font-weight:800
+}
+.shell .cartFloat{background:#22170f!important;color:#fff!important}
+.shell .cartFloat .cartCount{background:#ff9825!important;color:#fff!important}
+
+/* Mobile: referência enviada — um produto abaixo do outro */
+@media(max-width:680px){
+  .shell .container{width:calc(100% - 20px)!important}
+  .shell .topbar{position:sticky!important;top:0!important}
+  .shell .topbarInner{min-height:64px!important}
+  .shell .brandText strong{font-size:14px!important}
+  .shell .brandText span{font-size:10px!important}
+  .shell .hero{padding:8px 0 10px!important}
+  .shell .heroCard.heroCarousel{min-height:205px!important;border-radius:18px!important}
+  .shell .heroCarouselCopy{
+    min-height:205px!important;
+    width:82%!important;
+    padding:20px 18px 48px!important
+  }
+  .shell .heroCarouselCopy h1{font-size:31px!important;line-height:.95!important}
+  .shell .heroCarouselCopy p{font-size:11px!important;line-height:1.4!important}
+  .shell .heroDots{left:18px!important;bottom:14px!important}
+  .shell .heroArrow{width:34px!important;height:34px!important}
+  .shell .storeStrip{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;margin-top:9px!important}
+  .shell .storePill{padding:12px 13px!important;border-radius:15px!important;min-height:58px!important}
+
+  .shell .toolbar{top:64px!important;padding:9px 0 7px!important}
+  .shell .toolbar .container{display:flex!important;flex-direction:column!important;gap:8px!important}
+  .shell .searchRow,.shell .categoryRow{width:100%!important}
+  .shell .searchBox{min-height:46px!important;border-radius:14px!important}
+  .shell .categoryRow{
+    overflow-x:auto!important;display:flex!important;gap:8px!important;padding:0 0 2px!important
+  }
+  .shell .categoryBtn{padding:10px 16px!important;font-size:13px!important}
+
+  .shell .menuOverview{margin-top:18px!important}
+  .shell .menuOverview h2{font-size:26px!important}
+  .shell .categorySection{margin-bottom:24px!important}
+  .shell .categorySectionHead{min-height:42px!important;margin-bottom:10px!important}
+  .shell .categorySectionHead h3{font-size:21px!important}
+  .shell .categorySectionHead>span:last-child{display:none!important}
+
+  .shell .productGrid,
+  .shell .section-paes-de-queijo .productGrid,
+  .shell .section-salgados-assados .productGrid,
+  .shell .section-salgados-fritos .productGrid,
+  .shell .section-cafes .productGrid,
+  .shell .section-bebidas .productGrid{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important
+  }
+
+  .shell .productCard,
+  .shell .section-paes-de-queijo .productCard{
+    display:grid!important;
+    grid-template-columns:118px minmax(0,1fr)!important;
+    min-height:126px!important;
+    border-radius:18px!important;
+    overflow:hidden!important
+  }
+  .shell .productVisual,
+  .shell .section-paes-de-queijo .productVisual,
+  .shell .section-salgados-assados .productVisual,
+  .shell .section-salgados-fritos .productVisual,
+  .shell .section-cafes .productVisual,
+  .shell .section-bebidas .productVisual{
+    height:126px!important;
+    min-height:126px!important;
+    border-radius:0!important
+  }
+  .shell .productVisual .menuMedia{object-fit:cover!important}
+  .shell .productBody{
+    padding:11px 12px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    min-width:0!important
+  }
+  .shell .productBody h3{
+    font-size:16px!important;
+    line-height:1.12!important;
+    margin-bottom:4px!important
+  }
+  .shell .productBody p{
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+    font-size:11px!important;
+    line-height:1.35!important;
+    margin:0!important
+  }
+  .shell .productFoot{margin-top:9px!important;gap:8px!important}
+  .shell .price{font-size:18px!important}
+  .shell .price small{font-size:9px!important}
+  .shell .addBtn,
+  .shell .section-bebidas .addBtn{
+    min-width:40px!important;
+    width:40px!important;
+    height:40px!important;
+    padding:0!important;
+    border-radius:50%!important
+  }
+  .shell .addBtn span,.shell .section-bebidas .addBtn span{display:none!important}
+  .shell .badge{font-size:9px!important;top:8px!important;left:8px!important;padding:4px 7px!important}
+
+  .shell .pwaInstall{
+    left:10px!important;
+    bottom:10px!important;
+    width:calc(100vw - 20px)!important;
+    min-height:66px!important;
+    grid-template-columns:38px minmax(0,1fr) auto!important;
+    border-radius:16px!important;
+    padding:9px 10px!important
+  }
+  .shell .pwaInstallIcon{width:38px!important;height:38px!important}
+  .shell .pwaInstallCopy strong{font-size:12px!important}
+  .shell .pwaInstallCopy span{font-size:10px!important}
+  .shell .pwaInstallButton{min-height:34px!important;padding:0 10px!important;font-size:11px!important}
+
+  .shell .cartFloat{
+    left:auto!important;right:10px!important;bottom:88px!important;
+    width:auto!important;min-height:52px!important;padding:0 14px!important;border-radius:16px!important
+  }
+  .shell .cartFloat>span:nth-of-type(2){display:none!important}
+}
+
+@media(max-width:390px){
+  .shell .productCard,.shell .section-paes-de-queijo .productCard{grid-template-columns:108px minmax(0,1fr)!important}
+  .shell .productVisual,.shell .section-paes-de-queijo .productVisual,.shell .section-salgados-assados .productVisual,.shell .section-salgados-fritos .productVisual,.shell .section-cafes .productVisual,.shell .section-bebidas .productVisual{height:122px!important;min-height:122px!important}
+  .shell .productBody h3{font-size:15px!important}
+}
