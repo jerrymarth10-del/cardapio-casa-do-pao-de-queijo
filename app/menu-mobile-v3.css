@@ -595,3 +595,272 @@
     font-size:9px;
   }
 }
+
+
+/* Premium visual pass — imagens, hero e organização do cardápio */
+.shell .heroCarousel{
+  display:block;
+  min-height:300px;
+  padding:0!important;
+  isolation:isolate;
+  background:#2b190f;
+}
+.shell .heroCarousel::after{display:none;}
+.shell .heroSlides,
+.shell .heroSlide{
+  position:absolute;
+  inset:0;
+}
+.shell .heroSlides{
+  z-index:0;
+  overflow:hidden;
+}
+.shell .heroSlide{
+  opacity:0;
+  transform:scale(1.015);
+  transition:opacity .72s ease,transform 5.8s ease;
+  pointer-events:none;
+}
+.shell .heroSlide.active{
+  opacity:1;
+  transform:scale(1.055);
+}
+.shell .heroSlide .menuMedia{
+  object-fit:cover;
+  object-position:center center;
+  filter:saturate(1.07) contrast(1.035);
+}
+.shell .heroSlide.cold::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:.24;
+  background-image:
+    radial-gradient(circle at 8% 18%,rgba(255,255,255,.9) 0 1px,transparent 2px),
+    radial-gradient(circle at 22% 72%,rgba(255,255,255,.72) 0 1.4px,transparent 2.5px),
+    radial-gradient(circle at 47% 26%,rgba(255,255,255,.72) 0 1px,transparent 2px),
+    radial-gradient(circle at 68% 66%,rgba(255,255,255,.82) 0 1.4px,transparent 2.5px),
+    radial-gradient(circle at 86% 32%,rgba(255,255,255,.8) 0 1px,transparent 2px);
+  background-size:46px 42px,64px 58px,54px 48px,72px 66px,58px 52px;
+  mix-blend-mode:screen;
+}
+.shell .heroShade{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(31,15,6,.92) 0%,rgba(42,21,8,.78) 32%,rgba(40,20,7,.30) 62%,rgba(20,10,4,.08) 100%),
+    linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22));
+}
+.shell .heroCarouselCopy{
+  position:relative;
+  z-index:2;
+  width:min(620px,58%);
+  min-height:300px;
+  padding:36px 38px 58px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.shell .heroCarouselCopy h1{
+  margin:10px 0 10px;
+  font-size:clamp(34px,4.7vw,57px);
+  line-height:.97;
+  letter-spacing:-.045em;
+  text-shadow:0 4px 24px rgba(0,0,0,.28);
+}
+.shell .heroCarouselCopy p{
+  max-width:540px;
+  color:rgba(255,255,255,.88);
+  text-shadow:0 2px 12px rgba(0,0,0,.26);
+}
+.shell .heroDots{
+  position:absolute;
+  z-index:3;
+  left:38px;
+  bottom:22px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.shell .heroDots button{
+  width:9px;
+  height:9px;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.56);
+  box-shadow:0 2px 9px rgba(0,0,0,.18);
+  transition:width .2s ease,background .2s ease,transform .2s ease;
+}
+.shell .heroDots button.active{
+  width:28px;
+  background:#ffc33f;
+}
+.shell .heroDots button:hover{transform:scale(1.08);}
+
+/* Seções como cardápios profissionais, mantendo os mesmos dados e filtros */
+.shell .menuOverview{
+  margin-bottom:8px;
+}
+.shell .categorySection{
+  margin:0 0 30px;
+}
+.shell .categorySectionHead{
+  min-height:50px;
+  margin:3px 0 14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid rgba(69,42,21,.10);
+}
+.shell .categorySectionHead h3{
+  margin:0;
+  font-size:24px;
+  line-height:1.1;
+  letter-spacing:-.025em;
+}
+.shell .categorySectionHead > span:last-child{
+  margin-left:auto;
+  color:var(--menu-muted);
+  font-size:11px;
+  font-weight:750;
+}
+.shell .categoryAccent{
+  width:5px;
+  height:30px;
+  flex:0 0 5px;
+  border-radius:999px;
+  background:linear-gradient(180deg,#ffc94d,#ef9711);
+  box-shadow:0 7px 16px rgba(239,151,17,.24);
+}
+.shell .categorySection .productGrid{
+  padding-bottom:0!important;
+}
+.shell .categorySection:last-child .productGrid{
+  padding-bottom:110px!important;
+}
+
+/* Imagens mais consistentes e com acabamento publicitário */
+.shell .productVisual .menuMedia{
+  filter:saturate(1.06) contrast(1.035) brightness(1.015);
+}
+.shell .productCard:hover .productVisual .menuMedia{
+  transform:scale(1.025);
+}
+.shell .coldCard .productVisual::before{
+  content:"";
+  position:absolute;
+  z-index:2;
+  inset:0;
+  pointer-events:none;
+  opacity:.22;
+  background:
+    linear-gradient(115deg,rgba(255,255,255,.18),transparent 35%,rgba(255,255,255,.05) 61%,transparent),
+    radial-gradient(circle at 14% 22%,rgba(255,255,255,.98) 0 1px,rgba(255,255,255,.32) 1.5px,transparent 3px),
+    radial-gradient(circle at 36% 68%,rgba(255,255,255,.9) 0 1.2px,rgba(255,255,255,.25) 1.7px,transparent 3px),
+    radial-gradient(circle at 58% 31%,rgba(255,255,255,.88) 0 1px,rgba(255,255,255,.28) 1.6px,transparent 2.8px),
+    radial-gradient(circle at 81% 72%,rgba(255,255,255,.92) 0 1.3px,rgba(255,255,255,.28) 1.8px,transparent 3px);
+  background-size:auto,38px 36px,51px 46px,44px 40px,57px 52px;
+  mix-blend-mode:screen;
+}
+.shell .coldCard .productVisual::after{
+  z-index:3;
+  height:48%;
+  background:linear-gradient(180deg,transparent,rgba(22,12,5,.13));
+}
+
+/* No seletor de sabores, cada opção mostra sua própria foto */
+.shell .optionChoice{
+  min-height:68px;
+  align-items:center;
+  padding:8px 11px;
+}
+.shell .optionChoiceInfo{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  gap:11px;
+  text-align:left;
+}
+.shell .optionChoiceThumb{
+  position:relative;
+  width:58px;
+  height:48px;
+  flex:0 0 58px;
+  overflow:hidden;
+  border-radius:11px;
+  background:#f6ead6;
+  box-shadow:0 5px 14px rgba(64,37,15,.10);
+}
+.shell .optionChoiceThumb .menuMedia{
+  object-fit:cover;
+}
+.shell .optionChoice.active .optionChoiceThumb{
+  box-shadow:0 0 0 2px rgba(244,163,0,.62),0 7px 16px rgba(64,37,15,.12);
+}
+
+@media(max-width:680px){
+  .shell .heroCarousel{
+    min-height:270px;
+    padding:0!important;
+  }
+  .shell .heroSlide .menuMedia{
+    object-position:62% center;
+  }
+  .shell .heroShade{
+    background:
+      linear-gradient(90deg,rgba(28,13,5,.91) 0%,rgba(35,17,6,.73) 48%,rgba(27,13,5,.24) 100%),
+      linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.28));
+  }
+  .shell .heroCarouselCopy{
+    width:83%;
+    max-width:none;
+    min-height:270px;
+    padding:25px 20px 60px;
+  }
+  .shell .heroCarouselCopy h1{
+    max-width:290px;
+    font-size:clamp(31px,9.2vw,40px);
+  }
+  .shell .heroCarouselCopy p{
+    max-width:300px;
+    font-size:12px;
+    line-height:1.45;
+  }
+  .shell .heroDots{
+    left:20px;
+    bottom:20px;
+  }
+  .shell .categorySection{
+    margin-bottom:24px;
+  }
+  .shell .categorySectionHead{
+    min-height:46px;
+    margin-bottom:11px;
+  }
+  .shell .categorySectionHead h3{
+    font-size:21px;
+  }
+  .shell .categorySectionHead > span:last-child{
+    font-size:10px;
+  }
+  .shell .categorySection:last-child .productGrid{
+    padding-bottom:118px!important;
+  }
+  .shell .optionChoice{
+    min-height:70px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .shell .heroSlide{
+    transition:none!important;
+    transform:none!important;
+  }
+  .shell .heroDots button{
+    transition:none!important;
+  }
+}
