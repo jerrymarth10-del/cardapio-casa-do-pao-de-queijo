@@ -221,6 +221,10 @@ export default function MenuApp({ initialStore = '' }) {
   }, [initialStore]);
 
   useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((error) => console.warn('Falha ao registrar PWA:', error));
+    }
+
     const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const dismissed = window.localStorage.getItem(PWA_DISMISS_KEY) === '1';
     if (!standalone && !dismissed) setInstallVisible(true);
