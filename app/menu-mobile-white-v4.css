@@ -103,6 +103,18 @@ body{background:#fff!important;color:#22170f!important}
 .shell .optionChoice{background:#fff!important;border-color:#e9e1db!important;color:#25180f!important}
 .shell .optionChoice.active{background:#fff6ed!important;border-color:#f18b39!important}
 
+
+.shell .optionChoiceWrap{display:block}
+.shell .optionSubhead{
+  margin:12px 2px 7px;
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:#d85a08
+}
+.shell .optionChoiceWrap:first-child .optionSubhead{margin-top:2px}
+
 /* convite PWA */
 .shell .pwaInstall{
   position:fixed;
