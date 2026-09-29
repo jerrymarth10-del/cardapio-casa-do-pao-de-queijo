@@ -97,6 +97,7 @@ function MenuMedia({ source, alt = '', className = '', priority = false, sizes =
 
 function ProductCard({ product, store, availability, onAdd, displayName = '', displayImage = '', preset = null }) {
   const storeProduct = productForStore(product, store, availability);
+  const visualSlug = normalizeLabel(displayName || product.name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const media = getProductMedia(product);
   const disabled = !storeProduct.available;
 
@@ -117,7 +118,7 @@ function ProductCard({ product, store, availability, onAdd, displayName = '', di
 
   return (
     <article
-      className={`productCard ${disabled ? 'unavailable' : ''} ${product.category_id === 'bebidas' ? 'coldCard' : ''}`}
+      className={`productCard visual-${visualSlug} ${disabled ? 'unavailable' : ''} ${product.category_id === 'bebidas' ? 'coldCard' : ''}`}
       onPointerMove={tilt}
       onPointerLeave={reset}
     >
