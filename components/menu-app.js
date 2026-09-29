@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
+  ChevronLeft,
   ChevronRight,
   LocateFixed,
   MapPin,
@@ -493,19 +494,37 @@ export default function MenuApp({ initialStore = '' }) {
               <p>{HERO_SLIDES[heroIndex]?.text || 'Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.'}</p>
             </div>
             {HERO_SLIDES.length > 1 ? (
-              <div className="heroDots" role="tablist" aria-label="Destaques do cardápio">
-                {HERO_SLIDES.map((slide, index) => (
-                  <button
-                    type="button"
-                    key={slide.image}
-                    className={index === heroIndex ? 'active' : ''}
-                    aria-label={`Ver destaque ${index + 1}: ${slide.title}`}
-                    aria-selected={index === heroIndex}
-                    role="tab"
-                    onClick={() => setHeroIndex(index)}
-                  />
-                ))}
-              </div>
+              <>
+                <button
+                  type="button"
+                  className="heroArrow heroArrowLeft"
+                  aria-label="Banner anterior"
+                  onClick={() => setHeroIndex((current) => (current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button
+                  type="button"
+                  className="heroArrow heroArrowRight"
+                  aria-label="Próximo banner"
+                  onClick={() => setHeroIndex((current) => (current + 1) % HERO_SLIDES.length)}
+                >
+                  <ChevronRight size={24} />
+                </button>
+                <div className="heroDots" role="tablist" aria-label="Destaques do cardápio">
+                  {HERO_SLIDES.map((slide, index) => (
+                    <button
+                      type="button"
+                      key={slide.image}
+                      className={index === heroIndex ? 'active' : ''}
+                      aria-label={`Ver destaque ${index + 1}: ${slide.title}`}
+                      aria-selected={index === heroIndex}
+                      role="tab"
+                      onClick={() => setHeroIndex(index)}
+                    />
+                  ))}
+                </div>
+              </>
             ) : null}
           </div>
 
