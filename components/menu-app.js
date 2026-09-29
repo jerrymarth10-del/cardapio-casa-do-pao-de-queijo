@@ -35,6 +35,41 @@ function normalizeOptions(options) {
   }
 }
 
+function normalizeLabel(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function visualVariants(product) {
+  const name = normalizeLabel(product?.name);
+  const options = normalizeOptions(product?.options);
+
+  if (name === 'salgado assado') {
+    const group = options.find((item) => item.name === 'Sabor');
+    return (group?.values || []).map((value) => ({
+      key: `${product.id}-sabor-${value.label}`,
+      name: value.label,
+      image: getOptionImage(product, 'Sabor', value.label),
+      preset: { group: 'Sabor', label: value.label }
+    }));
+  }
+
+  if (name === 'refrigerante') {
+    const group = options.find((item) => item.name === 'Marca');
+    return (group?.values || []).map((value) => ({
+      key: `${product.id}-marca-${value.label}`,
+      name: value.label,
+      image: getOptionImage(product, 'Marca', value.label),
+      preset: { group: 'Marca', label: value.label }
+    }));
+  }
+
+  return [{ key: product.id, name: product.name, image: '', preset: null }];
+}
+
 function MenuMedia({ source, alt = '', className = '', priority = false, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw' }) {
   const [failed, setFailed] = useState(false);
   const src = failed ? '' : source;
@@ -59,7 +94,7 @@ function MenuMedia({ source, alt = '', className = '', priority = false, sizes =
   );
 }
 
-function ProductCard({ product, store, availability, onAdd }) {
+function ProductCard({ product, store, availability, onAdd, displayName = '', displayImage = '', preset = null }) {
   const storeProduct = productForStore(product, store, availability);
   const media = getProductMedia(product);
   const disabled = !storeProduct.available;
@@ -86,18 +121,18 @@ function ProductCard({ product, store, availability, onAdd }) {
       onPointerLeave={reset}
     >
       <div className="productVisual">
-        {media.image ? <MenuMedia source={media.image} alt={product.name} /> : <span className="productEmoji" aria-hidden="true">{product.emoji || '🥐'}</span>}
+        {(displayImage || media.image) ? <MenuMedia source={displayImage || media.image} alt={displayName || product.name} /> : <span className="productEmoji" aria-hidden="true">{product.emoji || '🥐'}</span>}
         {product.badge ? <span className="badge">{product.badge}</span> : null}
       </div>
       <div className="productBody">
-        <h3>{product.name}</h3>
+        <h3>{displayName || product.name}</h3>
         <p>{product.description}</p>
         <div className="productFoot">
           <div className="price">
             {money(storeProduct.price)}
             {normalizeOptions(product.options).length ? <small>a partir de</small> : null}
           </div>
-          <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price)} aria-label={disabled ? `${product.name} indisponível` : `Adicionar ${product.name}`}>
+          <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price, preset)} aria-label={disabled ? `${displayName || product.name} indisponível` : `Adicionar ${displayName || product.name}`}>
             {disabled ? <X size={18} /> : <Plus size={18} />}
             <span>{disabled ? 'Indisponível' : 'Adicionar'}</span>
           </button>
@@ -215,6 +250,15 @@ export default function MenuApp({ initialStore = '' }) {
         ...(categories.find((item) => item.id === category) || { id: category, name: 'Cardápio', icon: '•' }),
         products
       }];
+  const displaySections = productSections.flatMap((section) => {
+    if (section.id !== 'salgados') return [section];
+    const assados = section.products.filter((product) => normalizeLabel(product.name).includes('assado'));
+    const fritos = section.products.filter((product) => !normalizeLabel(product.name).includes('assado'));
+    return [
+      ...(assados.length ? [{ ...section, id: 'salgados-assados', name: 'Salgados assados', products: assados }] : []),
+      ...(fritos.length ? [{ ...section, id: 'salgados-fritos', name: 'Salgados fritos', products: fritos }] : [])
+    ];
+  });
   const itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.unit_price * item.qty, 0);
   const deliveryFee = form.fulfillment === 'delivery' ? Number(selectedStore?.delivery_fee || 0) : 0;
@@ -228,7 +272,7 @@ export default function MenuApp({ initialStore = '' }) {
     setForm((f) => ({ ...f, fulfillment: store.pickup_enabled === false ? 'delivery' : 'pickup' }));
   }
 
-  function beginAdd(product, basePrice) {
+  function beginAdd(product, basePrice, preset = null) {
     const options = normalizeOptions(product.options);
     const media = getProductMedia(product);
     if (!options.length && media.gallery.length <= 1) {
@@ -239,9 +283,25 @@ export default function MenuApp({ initialStore = '' }) {
     options.forEach((group) => {
       if (group.required && group.values?.length) initial[group.name] = group.values[0];
     });
+    if (preset?.group && preset?.label) {
+      const targetGroup = options.find((group) => group.name === preset.group);
+      const targetValue = targetGroup?.values?.find((value) => value.label === preset.label);
+      if (targetGroup && targetValue) initial[targetGroup.name] = targetValue;
+    }
     const initialOptionImage = options
       .map((group) => getOptionImage(product, group.name, initial[group.name]?.label))
       .find(Boolean);
+
+    const missingRequired = options.find((group) => group.required && !initial[group.name]);
+    if (preset && !missingRequired && options.length === 1) {
+      addToCart(
+        product,
+        basePrice,
+        options.filter((group) => initial[group.name]).map((group) => ({ group: group.name, value: initial[group.name] }))
+      );
+      return;
+    }
+
     setCustomizing({ ...product, options, media });
     setCustomBasePrice(basePrice);
     setSelections(initial);
@@ -479,15 +539,28 @@ export default function MenuApp({ initialStore = '' }) {
           <div><h2>Cardápio</h2><p>{products.length} opções disponíveis em {selectedStore?.short_name || 'sua unidade'}</p></div>
         </div>
         {source === 'fallback' ? <div className="notice" style={{ marginBottom: 12 }}>Exibindo a versão local do cardápio.</div> : null}
-        {productSections.length ? productSections.map((section) => (
-          <div className="categorySection" key={section.id}>
+        {displaySections.length ? displaySections.map((section) => (
+          <div className={`categorySection section-${section.id}`} key={section.id}>
             <div className="categorySectionHead">
               <span className="categoryAccent" aria-hidden="true" />
               <h3>{section.icon ? <span aria-hidden="true">{section.icon} </span> : null}{section.name}</h3>
-              <span>{section.products.length} {section.products.length === 1 ? 'opção' : 'opções'}</span>
+              <span>{section.products.flatMap((product) => visualVariants(product)).length} {section.products.flatMap((product) => visualVariants(product)).length === 1 ? 'opção' : 'opções'}</span>
             </div>
             <div className="productGrid">
-              {section.products.map((product) => <ProductCard key={product.id} product={product} store={selectedStore} availability={catalog.availability || []} onAdd={beginAdd} />)}
+              {section.products.flatMap((product) =>
+                visualVariants(product).map((variant) => (
+                  <ProductCard
+                    key={variant.key}
+                    product={product}
+                    displayName={variant.name}
+                    displayImage={variant.image}
+                    preset={variant.preset}
+                    store={selectedStore}
+                    availability={catalog.availability || []}
+                    onAdd={beginAdd}
+                  />
+                ))
+              )}
             </div>
           </div>
         )) : <div className="empty">Nenhum produto encontrado nesta categoria.</div>}
