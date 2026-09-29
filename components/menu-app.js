@@ -702,20 +702,24 @@ export default function MenuApp({ initialStore = '' }) {
                 <div className="optionGroup" key={group.name}>
                   <h4>{group.name} {group.required ? <small>· obrigatório</small> : null}</h4>
                   <div className="optionList">
-                    {(group.values || []).map((value) => {
+                    {(group.values || []).map((value, index, values) => {
                       const active = selections[group.name]?.label === value.label;
                       const optionImage = getOptionImage(customizing, group.name, value.label);
+                      const showSection = value.section && (index === 0 || values[index - 1]?.section !== value.section);
                       return (
-                        <button key={value.label} className={`optionChoice ${active ? 'active' : ''}`} onClick={() => {
-                          setSelections((current) => ({ ...current, [group.name]: value }));
-                          if (optionImage) setCustomPreview(optionImage);
-                        }}>
-                          <span className="optionChoiceInfo">
-                            {optionImage ? <span className="optionChoiceThumb"><MenuMedia source={optionImage} alt="" sizes="58px" /></span> : null}
-                            <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
-                          </span>
-                          <strong>{Number(value.price_delta || 0) ? `+ ${money(value.price_delta)}` : ''}</strong>
-                        </button>
+                        <div className="optionChoiceWrap" key={value.label}>
+                          {showSection ? <div className="optionSubhead">{value.section}</div> : null}
+                          <button className={`optionChoice ${active ? 'active' : ''}`} onClick={() => {
+                            setSelections((current) => ({ ...current, [group.name]: value }));
+                            if (optionImage) setCustomPreview(optionImage);
+                          }}>
+                            <span className="optionChoiceInfo">
+                              {optionImage ? <span className="optionChoiceThumb"><MenuMedia source={optionImage} alt="" sizes="58px" /></span> : null}
+                              <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
+                            </span>
+                            <strong>{Number(value.price_delta || 0) ? `+ ${money(value.price_delta)}` : ''}</strong>
+                          </button>
+                        </div>
                       );
                     })}
                   </div>
