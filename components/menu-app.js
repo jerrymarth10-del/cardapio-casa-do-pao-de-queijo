@@ -234,6 +234,7 @@ export default function MenuApp({ initialStore = '' }) {
     );
     return (catalog.products || [])
       .filter((p) => p.active !== false && p.is_active !== false)
+      .filter((p) => !['cappuccino', 'chocolate quente'].includes(normalizeLabel(p.name)))
       .filter((p) => category === 'all' || p.category_id === category)
       .filter((p) => !term || `${p.name} ${p.description || ''}`.toLocaleLowerCase('pt-BR').includes(term))
       .filter((p) => productForStore(p, selectedStore, catalog.availability || []).available)
