@@ -289,10 +289,56 @@ export default function AdminDashboard() {
     finally { setUploading(false); }
   }
 
-  async function updateOrderStatus(order, status) {
-    if (!cloud) return;
+  function customerWhatsapp(phone) {
+    const digits = String(phone || '').replace(/\D/g, '');
+    if (!digits) return '';
+    if (digits.startsWith('55')) return digits;
+    if (digits.length === 10 || digits.length === 11) return `55${digits}`;
+    return digits;
+  }
+
+  function statusMessage(order, status) {
+    const customer = order.customer_name?.trim() ? ` ${order.customer_name.trim()}` : '';
+    const number = order.order_number ? `\n🧾 Pedido: *${order.order_number}*` : '';
+    const messages = {
+      accepted: `✅ *Pedido aceito!*\nOi${customer}! Seu pedido na Casa do Pão de Queijo foi aceito e já entrou na nossa fila.${number}`,
+      preparing: `👨‍🍳 *Seu pedido está em produção!*\nOi${customer}! Já estamos preparando tudo com carinho e em breve teremos novidade.${number}`,
+      ready: order.fulfillment === 'delivery'
+        ? `📦 *Seu pedido está pronto!*\nOi${customer}! Finalizamos o preparo e ele já está sendo organizado para sair para entrega.${number}`
+        : `🛍️ *Seu pedido está pronto para retirada!*\nOi${customer}! Pode vir buscar quando quiser.${number}`,
+      out_for_delivery: `🛵💨 *Seu pedido saiu para entrega!*\nOi${customer}! Boas notícias: seu pedido da Casa do Pão de Queijo já está a caminho. 😋${number}`,
+      completed: `💛 *Pedido concluído!*\nObrigado${customer} por pedir com a Casa do Pão de Queijo. Esperamos que aproveite! 😋${number}`
+    };
+    return messages[status] || '';
+  }
+
+  async function updateOrderStatus(order, status, notify = false) {
+    if (!cloud) return false;
+    let whatsappWindow = null;
+    if (notify && statusMessage(order, status)) {
+      whatsappWindow = window.open('', '_blank');
+    }
     const { error } = await supabase.from('menu_orders').update({ status }).eq('id', order.id);
-    if (error) window.alert(error.message); else setOrders((rows) => rows.map((r) => r.id === order.id ? { ...r, status } : r));
+    if (error) {
+      if (whatsappWindow) whatsappWindow.close();
+      window.alert(error.message);
+      return false;
+    }
+    setOrders((rows) => rows.map((r) => r.id === order.id ? { ...r, status } : r));
+
+    if (notify) {
+      const phone = customerWhatsapp(order.customer_phone);
+      const message = statusMessage(order, status);
+      if (!phone || !message) {
+        if (whatsappWindow) whatsappWindow.close();
+        window.alert('O pedido foi atualizado, mas o cliente não tem um WhatsApp válido cadastrado.');
+        return true;
+      }
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      if (whatsappWindow) whatsappWindow.location.href = url;
+      else window.location.href = url;
+    }
+    return true;
   }
 
   const stats = useMemo(() => ({
@@ -370,8 +416,8 @@ export default function AdminDashboard() {
           </> : null}
 
           {tab === 'orders' ? <>
-            <div className="adminTitle"><div><h1>Pedidos</h1><p>Histórico recebido pelo cardápio online.</p></div></div>
-            {!cloud ? <div className="empty">Os pedidos aparecerão aqui quando o banco do cardápio estiver conectado.</div> : <div className="panel"><div className="tableWrap"><table className="dataTable"><thead><tr><th>Pedido</th><th>Cliente</th><th>Unidade</th><th>Total</th><th>Status</th></tr></thead><tbody>{orders.map((o) => <tr key={o.id}><td><strong>{o.order_number}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{new Date(o.created_at).toLocaleString('pt-BR')}</div></td><td>{o.customer_name}<div style={{ fontSize: 11, color: '#837b76' }}>{o.customer_phone}</div></td><td>{catalog.stores.find((s) => s.id === o.store_id)?.short_name || '—'}</td><td><strong>{money(o.total)}</strong></td><td><select value={o.status} onChange={(e) => updateOrderStatus(o, e.target.value)}><option value="new">Novo</option><option value="accepted">Aceito</option><option value="preparing">Preparando</option><option value="ready">Pronto</option><option value="out_for_delivery">Saiu para entrega</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select></td></tr>)}</tbody></table></div></div>}
+            <div className="adminTitle"><div><h1>Pedidos</h1><p>Atualize o andamento e avise o cliente pelo WhatsApp com um toque.</p></div></div>
+            {!cloud ? <div className="empty">Os pedidos aparecerão aqui quando o banco do cardápio estiver conectado.</div> : <div className="panel orderPanel"><div className="tableWrap"><table className="dataTable orderTable"><thead><tr><th>Pedido</th><th>Cliente</th><th>Unidade</th><th>Total</th><th>Status</th><th>Avisar cliente</th></tr></thead><tbody>{orders.map((o) => <tr key={o.id}><td><strong>{o.order_number}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{new Date(o.created_at).toLocaleString('pt-BR')}</div></td><td><strong>{o.customer_name}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{o.customer_phone}</div></td><td>{catalog.stores.find((s) => s.id === o.store_id)?.short_name || '—'}</td><td><strong>{money(o.total)}</strong></td><td><select className="orderStatusSelect" value={o.status} onChange={(e) => updateOrderStatus(o, e.target.value)}><option value="new">Novo</option><option value="accepted">Pedido aceito</option><option value="preparing">Em produção</option><option value="ready">Pronto</option><option value="out_for_delivery">Saiu para entrega</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select></td><td><div className="orderQuickActions"><button type="button" className={`orderAction accepted ${o.status === 'accepted' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'accepted', true)}>✅ Aceito</button><button type="button" className={`orderAction preparing ${o.status === 'preparing' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'preparing', true)}>👨‍🍳 Em produção</button>{o.fulfillment === 'delivery' ? <button type="button" className={`orderAction delivery ${o.status === 'out_for_delivery' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'out_for_delivery', true)}>🛵 Saiu p/ entrega</button> : <button type="button" className={`orderAction ready ${o.status === 'ready' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'ready', true)}>🛍️ Pronto p/ retirar</button>}<button type="button" className={`orderAction completed ${o.status === 'completed' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'completed', true)}>💛 Concluído</button></div></td></tr>)}</tbody></table></div></div>}
           </> : null}
         </section>
       </div>
