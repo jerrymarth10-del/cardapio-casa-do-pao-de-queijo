@@ -7,7 +7,7 @@ import { money } from '@/lib/catalog';
 const labels = {
   new: 'Pedido recebido',
   accepted: 'Pedido aceito',
-  preparing: 'Em preparação',
+  preparing: 'Pedido em produção',
   ready: 'Pronto',
   out_for_delivery: 'Saiu para entrega',
   completed: 'Concluído',
