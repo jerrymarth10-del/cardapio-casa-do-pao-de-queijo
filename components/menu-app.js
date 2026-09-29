@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { DEMO_CATALOG, money } from '@/lib/catalog';
 import { BRAND_MEDIA, getOptionImage, getProductMedia } from '@/lib/menu-media';
-import { loadCatalog, productForStore } from '@/lib/catalog-service';
+import { loadCatalog, normalizeCatalog, productForStore } from '@/lib/catalog-service';
 
 const STORE_KEY = 'cpq_selected_store_v2';
 const DELIVERY_CITY = 'Rolim de Moura';
@@ -147,7 +147,7 @@ function ProductCard({ product, store, availability, onAdd, displayName = '', di
 }
 
 export default function MenuApp({ initialStore = '' }) {
-  const [catalog, setCatalog] = useState(DEMO_CATALOG);
+  const [catalog, setCatalog] = useState(() => normalizeCatalog(DEMO_CATALOG));
   const [source, setSource] = useState('loading');
   const [heroIndex, setHeroIndex] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
@@ -205,7 +205,7 @@ export default function MenuApp({ initialStore = '' }) {
       } catch (error) {
         console.error('Falha ao carregar catálogo:', error);
         if (alive) {
-          setCatalog(DEMO_CATALOG);
+          setCatalog(normalizeCatalog(DEMO_CATALOG));
           setSource('fallback');
         }
       }
