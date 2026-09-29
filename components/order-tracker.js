@@ -6,10 +6,10 @@ import { money } from '@/lib/catalog';
 
 const labels = {
   new: 'Pedido recebido',
-  accepted: 'Pedido aceito',
+  accepted: '✅ Pedido aceito',
   preparing: 'Pedido em produção',
   ready: 'Pronto',
-  out_for_delivery: 'Saiu para entrega',
+  out_for_delivery: '🚀🛵 Saiu para entrega',
   completed: 'Concluído',
   cancelled: 'Cancelado'
 };
