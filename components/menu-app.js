@@ -107,12 +107,12 @@ function ProductCard({ product, store, availability, onAdd }) {
   );
 }
 
-export default function MenuApp() {
+export default function MenuApp({ initialStore = '' }) {
   const [catalog, setCatalog] = useState(DEMO_CATALOG);
   const [source, setSource] = useState('loading');
   const [heroIndex, setHeroIndex] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
-  const [storeId, setStoreId] = useState('');
+  const [storeId, setStoreId] = useState(initialStore);
   const [storeGateOpen, setStoreGateOpen] = useState(false);
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
@@ -143,7 +143,8 @@ export default function MenuApp() {
 
   useEffect(() => {
     let alive = true;
-    const saved = window.localStorage.getItem(STORE_KEY) || '';
+    const saved = initialStore || window.localStorage.getItem(STORE_KEY) || '';
+    if (initialStore) window.localStorage.setItem(STORE_KEY, initialStore);
     setStoreId(saved);
     setStoreGateOpen(!saved);
 
@@ -153,7 +154,7 @@ export default function MenuApp() {
         if (!alive) return;
         setCatalog(data);
         setSource(data.source || 'supabase');
-        const candidate = window.localStorage.getItem(STORE_KEY) || '';
+        const candidate = initialStore || window.localStorage.getItem(STORE_KEY) || '';
         if (candidate && !(data.stores || []).some((s) => s.id === candidate || s.slug === candidate)) {
           window.localStorage.removeItem(STORE_KEY);
           setStoreId('');
@@ -175,7 +176,7 @@ export default function MenuApp() {
       alive = false;
       window.removeEventListener('cpq:catalog-updated', onLocalUpdate);
     };
-  }, []);
+  }, [initialStore]);
 
   useEffect(() => {
     if (heroPaused || HERO_SLIDES.length < 2) return;
