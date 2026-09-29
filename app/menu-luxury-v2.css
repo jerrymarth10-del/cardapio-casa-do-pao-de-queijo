@@ -65,6 +65,17 @@ body{background:#090909!important;color:#fff}
 .shell .heroDots button{background:rgba(255,255,255,.56)!important}
 .shell .heroDots button.active{background:var(--lux-gold)!important}
 
+
+.shell .heroArrow{
+  position:absolute!important;top:50%!important;z-index:4!important;transform:translateY(-50%)!important;
+  width:44px!important;height:44px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.18)!important;
+  background:rgba(7,7,7,.62)!important;color:#fff!important;display:grid!important;place-items:center!important;
+  backdrop-filter:blur(8px)!important;box-shadow:0 8px 24px rgba(0,0,0,.28)!important
+}
+.shell .heroArrow:hover{background:rgba(255,181,27,.92)!important;color:#171003!important;border-color:#ffbd2a!important}
+.shell .heroArrowLeft{left:16px!important}
+.shell .heroArrowRight{right:16px!important}
+
 /* Lojas */
 .shell .storeStrip{gap:10px!important;margin-top:12px!important}
 .shell .storePill{
@@ -219,6 +230,10 @@ body{background:#090909!important;color:#fff}
   .shell .section-bebidas .productGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 @media(max-width:680px){
+  .shell .heroArrow{width:36px!important;height:36px!important}
+  .shell .heroArrowLeft{left:8px!important}
+  .shell .heroArrowRight{right:8px!important}
+
   .shell .container{width:min(100% - 18px,1460px)!important}
   .shell .topbar,.shell .topbarInner{min-height:66px!important}
   .shell .toolbar{top:66px!important}
