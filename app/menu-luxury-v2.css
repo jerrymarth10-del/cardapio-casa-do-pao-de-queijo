@@ -280,3 +280,116 @@ body{background:#090909!important;color:#fff}
 @media(prefers-reduced-motion:reduce){
   .shell .productCard,.shell .productVisual .menuMedia{transition:none!important}
 }
+
+
+/* FINAL PROFESSIONAL IMAGE PASS */
+.shell .heroCard.heroCarousel{
+  min-height:0!important;
+  aspect-ratio:3/1!important;
+  border-radius:22px!important;
+}
+.shell .heroCarouselCopy{display:none!important}
+.shell .heroShade{background:linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.08))!important}
+.shell .heroSlide .menuMedia{
+  object-fit:cover!important;
+  object-position:center!important;
+  filter:none!important;
+  transform:none!important;
+}
+.shell .heroSlide.active{transform:none!important}
+.shell .heroDots{
+  left:50%!important;
+  bottom:13px!important;
+  transform:translateX(-50%)!important;
+}
+.shell .heroDots button{background:rgba(255,255,255,.78)!important}
+.shell .heroDots button.active{background:#ffb51b!important}
+.shell .heroArrow{background:rgba(0,0,0,.56)!important}
+
+/* Compactar seleção de lojas para o produto aparecer logo após o banner */
+.shell .storeStrip{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  margin-top:9px!important;
+}
+.shell .storePill{
+  min-height:50px!important;
+  padding:9px 13px!important;
+  border-radius:12px!important;
+}
+.shell .storePill strong{font-size:14px!important}
+.shell .storePill span{
+  font-size:10px!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.shell .menuOverview{display:none!important}
+
+/* Usar as novas composições como fotografia profissional e recortar o produto certo */
+.shell .productVisual .menuMedia{object-fit:cover!important;filter:none!important}
+
+/* pão de queijo */
+.shell .visual-pao-de-queijo-tradicional .menuMedia{object-position:78% center!important}
+.shell .visual-pao-de-queijo-recheado .menuMedia{object-position:54% center!important}
+
+/* assados */
+.shell .visual-frango-com-catupiry .menuMedia{object-position:38% center!important}
+.shell .visual-carne .menuMedia{object-position:60% center!important}
+.shell .visual-queijo-com-presunto .menuMedia{object-position:82% center!important}
+.shell .visual-mini-pizza .menuMedia{object-position:100% center!important}
+
+/* cafés */
+.shell .visual-cafe .menuMedia{object-position:72% center!important}
+.shell .visual-cafe-com-leite .menuMedia{object-position:100% center!important}
+
+/* bebidas: composição gelada com gelo + condensação */
+.shell .visual-coca-cola .menuMedia{object-position:46% center!important}
+.shell .visual-fanta-laranja .menuMedia{object-position:59% center!important}
+.shell .visual-guarana-antartica .menuMedia{object-position:70% center!important}
+.shell .visual-tampico .menuMedia{object-position:82% center!important}
+.shell .visual-gatorade .menuMedia{object-position:91% center!important}
+.shell .visual-todinho .menuMedia{object-position:100% center!important}
+
+.shell .coldCard .productVisual::before{display:none!important}
+.shell .coldCard .productVisual::after{
+  content:""!important;
+  position:absolute!important;
+  inset:auto 0 0!important;
+  height:28%!important;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.22))!important;
+  z-index:2!important;
+}
+
+@media(max-width:680px){
+  .shell .heroCard.heroCarousel{
+    aspect-ratio:2.25/1!important;
+    min-height:0!important;
+  }
+  .shell .heroSlide .menuMedia{
+    object-fit:cover!important;
+    object-position:center!important;
+  }
+  .shell .storeStrip{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .shell .storePill{
+    min-height:54px!important;
+    padding:8px 10px!important;
+  }
+  .shell .storePill span{font-size:9px!important}
+  .shell .toolbar{padding-top:8px!important}
+  .shell .productCard,
+  .shell .section-paes-de-queijo .productCard{
+    grid-template-columns:148px minmax(0,1fr)!important;
+  }
+  .shell .productVisual,
+  .shell .section-paes-de-queijo .productVisual,
+  .shell .section-salgados-assados .productVisual,
+  .shell .section-cafes .productVisual,
+  .shell .section-bebidas .productVisual{
+    height:140px!important;
+    min-height:140px!important;
+  }
+}
