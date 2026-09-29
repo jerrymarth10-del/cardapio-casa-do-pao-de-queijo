@@ -187,7 +187,7 @@ export async function POST(request) {
   const [{ data: store, error: storeError }, { data: products, error: productsError }, { data: availability, error: availabilityError }] = await Promise.all([
     supabase.from('menu_stores').select('*').eq('id', requestedStoreId).eq('is_active', true).maybeSingle(),
     supabase.from('menu_products').select('*').in('id', productIds).eq('is_active', true),
-    supabase.from('menu_store_products').select('*').eq('store_id', payload.store_id).in('product_id', productIds)
+    supabase.from('menu_store_products').select('*').eq('store_id', requestedStoreId).in('product_id', productIds)
   ]);
 
   if (storeError || productsError || availabilityError || !store) {
