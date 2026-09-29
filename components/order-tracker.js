@@ -7,9 +7,9 @@ import { money } from '@/lib/catalog';
 const labels = {
   new: 'Pedido recebido',
   accepted: '✅ Pedido aceito',
-  preparing: 'Pedido em produção',
+  preparing: '🍳 Pedido em produção',
   ready: 'Pronto',
-  out_for_delivery: '🚀🛵 Saiu para entrega',
+  out_for_delivery: '🚀🛵 Seu pedido saiu para entrega',
   completed: 'Concluído',
   cancelled: 'Cancelado'
 };
