@@ -23,6 +23,7 @@ import { loadCatalog, productForStore } from '@/lib/catalog-service';
 const STORE_KEY = 'cpq_selected_store_v2';
 const DELIVERY_CITY = 'Rolim de Moura';
 const DELIVERY_STATE = 'RO';
+const HERO_SLIDES = BRAND_MEDIA.heroSlides || [];
 
 function normalizeOptions(options) {
   if (Array.isArray(options)) return options;
@@ -80,7 +81,7 @@ function ProductCard({ product, store, availability, onAdd }) {
 
   return (
     <article
-      className={`productCard ${disabled ? 'unavailable' : ''}`}
+      className={`productCard ${disabled ? 'unavailable' : ''} ${product.category_id === 'bebidas' ? 'coldCard' : ''}`}
       onPointerMove={tilt}
       onPointerLeave={reset}
     >
@@ -109,6 +110,8 @@ function ProductCard({ product, store, availability, onAdd }) {
 export default function MenuApp() {
   const [catalog, setCatalog] = useState(DEMO_CATALOG);
   const [source, setSource] = useState('loading');
+  const [heroIndex, setHeroIndex] = useState(0);
+  const [heroPaused, setHeroPaused] = useState(false);
   const [storeId, setStoreId] = useState('');
   const [storeGateOpen, setStoreGateOpen] = useState(false);
   const [category, setCategory] = useState('all');
@@ -174,20 +177,43 @@ export default function MenuApp() {
     };
   }, []);
 
+  useEffect(() => {
+    if (heroPaused || HERO_SLIDES.length < 2) return;
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setInterval(() => {
+      setHeroIndex((current) => (current + 1) % HERO_SLIDES.length);
+    }, 4800);
+    return () => window.clearInterval(timer);
+  }, [heroPaused]);
+
   const stores = (catalog.stores || []).filter((s) => s.is_active !== false);
   const selectedStore = stores.find((s) => s.id === storeId || s.slug === storeId) || stores[0] || null;
 
   const products = useMemo(() => {
     const term = search.trim().toLocaleLowerCase('pt-BR');
+    const categoryRank = new Map(
+      (catalog.categories || []).map((item, index) => [item.id, Number(item.sort_order ?? index)])
+    );
     return (catalog.products || [])
       .filter((p) => p.active !== false && p.is_active !== false)
       .filter((p) => category === 'all' || p.category_id === category)
       .filter((p) => !term || `${p.name} ${p.description || ''}`.toLocaleLowerCase('pt-BR').includes(term))
       .filter((p) => productForStore(p, selectedStore, catalog.availability || []).available)
-      .sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+      .sort((a, b) => {
+        const byCategory = Number(categoryRank.get(a.category_id) ?? 999) - Number(categoryRank.get(b.category_id) ?? 999);
+        return byCategory || Number(a.sort_order || 0) - Number(b.sort_order || 0);
+      });
   }, [catalog, category, search, selectedStore]);
 
   const categories = (catalog.categories || []).slice().sort((a, b) => Number(a.sort_order || 0) - Number(b.sort_order || 0));
+  const productSections = category === 'all'
+    ? categories
+        .map((item) => ({ ...item, products: products.filter((product) => product.category_id === item.id) }))
+        .filter((item) => item.products.length)
+    : [{
+        ...(categories.find((item) => item.id === category) || { id: category, name: 'Cardápio', icon: '•' }),
+        products
+      }];
   const itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.unit_price * item.qty, 0);
   const deliveryFee = form.fulfillment === 'delivery' ? Number(selectedStore?.delivery_fee || 0) : 0;
@@ -378,19 +404,48 @@ export default function MenuApp() {
 
       <section className="hero">
         <div className="container">
-          <div className="heroCard">
-            <div className="heroCopy">
+          <div
+            className="heroCard heroCarousel"
+            onMouseEnter={() => setHeroPaused(true)}
+            onMouseLeave={() => setHeroPaused(false)}
+          >
+            <div className="heroSlides" aria-live="polite">
+              {(HERO_SLIDES.length ? HERO_SLIDES : [{ image: BRAND_MEDIA.fachada, title: 'Quentinho, rápido e do seu jeito.', text: 'Escolha sua unidade e faça seu pedido.' }]).map((slide, index) => (
+                <div
+                  className={`heroSlide ${index === heroIndex ? 'active' : ''} ${slide.cold ? 'cold' : ''}`}
+                  key={slide.image}
+                  aria-hidden={index !== heroIndex}
+                >
+                  <MenuMedia
+                    source={slide.image}
+                    alt=""
+                    priority={index === 0}
+                    sizes="(max-width: 680px) calc(100vw - 24px), 1180px"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="heroShade" />
+            <div className="heroCopy heroCarouselCopy">
               <span className="eyebrow"><PackageCheck size={14} /> pedido direto da loja</span>
-              <h1>Quentinho, rápido e do seu jeito.</h1>
-              <p>Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.</p>
+              <h1>{HERO_SLIDES[heroIndex]?.title || 'Quentinho, rápido e do seu jeito.'}</h1>
+              <p>{HERO_SLIDES[heroIndex]?.text || 'Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.'}</p>
             </div>
-            <div className="heroStat heroPhotoStat">
-              <div className="heroPhoto"><MenuMedia source={BRAND_MEDIA.fachada} alt="Casa do Pão de Queijo" priority sizes="(max-width: 680px) 116px, 320px" /></div>
-              <div className="heroStatCopy">
-                <strong>Feito para pedir fácil</strong>
-                <span>Sem cadastro obrigatório e com retirada ou entrega.</span>
+            {HERO_SLIDES.length > 1 ? (
+              <div className="heroDots" role="tablist" aria-label="Destaques do cardápio">
+                {HERO_SLIDES.map((slide, index) => (
+                  <button
+                    type="button"
+                    key={slide.image}
+                    className={index === heroIndex ? 'active' : ''}
+                    aria-label={`Ver destaque ${index + 1}: ${slide.title}`}
+                    aria-selected={index === heroIndex}
+                    role="tab"
+                    onClick={() => setHeroIndex(index)}
+                  />
+                ))}
               </div>
-            </div>
+            ) : null}
           </div>
 
           <div className="storeStrip">
@@ -419,15 +474,22 @@ export default function MenuApp() {
       </section>
 
       <section className="container">
-        <div className="sectionHead">
+        <div className="sectionHead menuOverview">
           <div><h2>Cardápio</h2><p>{products.length} opções disponíveis em {selectedStore?.short_name || 'sua unidade'}</p></div>
         </div>
         {source === 'fallback' ? <div className="notice" style={{ marginBottom: 12 }}>Exibindo a versão local do cardápio.</div> : null}
-        {products.length ? (
-          <div className="productGrid">
-            {products.map((product) => <ProductCard key={product.id} product={product} store={selectedStore} availability={catalog.availability || []} onAdd={beginAdd} />)}
+        {productSections.length ? productSections.map((section) => (
+          <div className="categorySection" key={section.id}>
+            <div className="categorySectionHead">
+              <span className="categoryAccent" aria-hidden="true" />
+              <h3>{section.icon ? <span aria-hidden="true">{section.icon} </span> : null}{section.name}</h3>
+              <span>{section.products.length} {section.products.length === 1 ? 'opção' : 'opções'}</span>
+            </div>
+            <div className="productGrid">
+              {section.products.map((product) => <ProductCard key={product.id} product={product} store={selectedStore} availability={catalog.availability || []} onAdd={beginAdd} />)}
+            </div>
           </div>
-        ) : <div className="empty">Nenhum produto encontrado nesta categoria.</div>}
+        )) : <div className="empty">Nenhum produto encontrado nesta categoria.</div>}
       </section>
 
       {itemCount > 0 ? (
@@ -483,13 +545,16 @@ export default function MenuApp() {
                   <div className="optionList">
                     {(group.values || []).map((value) => {
                       const active = selections[group.name]?.label === value.label;
+                      const optionImage = getOptionImage(customizing, group.name, value.label);
                       return (
                         <button key={value.label} className={`optionChoice ${active ? 'active' : ''}`} onClick={() => {
                           setSelections((current) => ({ ...current, [group.name]: value }));
-                          const image = getOptionImage(customizing, group.name, value.label);
-                          if (image) setCustomPreview(image);
+                          if (optionImage) setCustomPreview(optionImage);
                         }}>
-                          <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
+                          <span className="optionChoiceInfo">
+                            {optionImage ? <span className="optionChoiceThumb"><MenuMedia source={optionImage} alt="" sizes="58px" /></span> : null}
+                            <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
+                          </span>
                           <strong>{Number(value.price_delta || 0) ? `+ ${money(value.price_delta)}` : ''}</strong>
                         </button>
                       );
