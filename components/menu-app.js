@@ -287,7 +287,8 @@ export default function MenuApp({ initialStore = '' }) {
         products
       }];
   const displaySections = productSections.flatMap((section) => {
-    if (section.id !== 'salgados') return [section];
+    const sectionKey = normalizeLabel(section.slug || section.name || section.id);
+    if (sectionKey !== 'salgados') return [section];
     const assados = section.products.filter((product) => normalizeLabel(product.name).includes('assado'));
     const fritos = section.products.filter((product) => !normalizeLabel(product.name).includes('assado'));
     return [
