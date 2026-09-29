@@ -63,6 +63,14 @@ function ProductCard({ product, store, availability, onAdd }) {
   const storeProduct = productForStore(product, store, availability);
   const media = getProductMedia(product);
   const disabled = !storeProduct.available;
+  const optionGroups = normalizeOptions(product.options);
+  const normalizedName = String(product.name || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const bakedSavoryGroup = normalizedName === 'salgado assado'
+    ? optionGroups.find((group) => group.name === 'Sabor' || group.name?.toLowerCase() === 'sabor')
+    : null;
+  const bakedSavoryOptions = (bakedSavoryGroup?.values || [])
+    .map((value) => ({ label: value.label, image: getOptionImage(product, bakedSavoryGroup.name, value.label) }))
+    .filter((item) => item.image);
 
   function tilt(event) {
     if (typeof window === 'undefined' || !window.matchMedia('(hover: hover)').matches) return;
@@ -92,6 +100,16 @@ function ProductCard({ product, store, availability, onAdd }) {
       <div className="productBody">
         <h3>{product.name}</h3>
         <p>{product.description}</p>
+        {bakedSavoryOptions.length ? (
+          <div className="flavorPreview" aria-label="Sabores disponíveis">
+            {bakedSavoryOptions.map((item) => (
+              <div className="flavorPreviewItem" key={item.label}>
+                <span className="flavorPreviewPhoto"><MenuMedia source={item.image} alt="" sizes="70px" /></span>
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        ) : null}
         <div className="productFoot">
           <div className="price">
             {money(storeProduct.price)}
