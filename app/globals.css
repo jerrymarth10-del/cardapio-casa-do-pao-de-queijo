@@ -412,3 +412,58 @@ a { color: inherit; text-decoration: none; }
   .productCard:hover { transform: none; }
   .btn, .storeChoice { transition: none; }
 }
+
+
+/* Gestão rápida de pedidos */
+.orderTable td{vertical-align:middle;}
+.orderStatusSelect{
+  min-height:40px;
+  min-width:150px;
+  border:1px solid #e7e2dc;
+  border-radius:11px;
+  background:#fff;
+  padding:0 10px;
+  color:#33261d;
+  font-weight:750;
+}
+.orderQuickActions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+  min-width:330px;
+}
+.orderAction{
+  min-height:38px;
+  padding:0 11px;
+  border:1px solid #e7e2dc;
+  border-radius:11px;
+  background:#fff;
+  color:#3b2b20;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  box-shadow:0 5px 14px rgba(44,27,15,.05);
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease,background .14s ease;
+}
+.orderAction:hover{
+  transform:translateY(-1px);
+  border-color:rgba(244,163,0,.45);
+  box-shadow:0 9px 20px rgba(44,27,15,.09);
+}
+.orderAction.active{
+  background:#fff1ce;
+  border-color:#f4a300;
+  color:#6b4300;
+}
+.orderAction.delivery{
+  background:#eef8ff;
+  border-color:#bfe1f7;
+}
+.orderAction.delivery.active{
+  background:#dff2ff;
+  border-color:#55aee5;
+  color:#075f94;
+}
+@media(max-width:900px){
+  .orderQuickActions{min-width:280px;}
+}
