@@ -7,13 +7,20 @@ import './menu-mobile-white-v4.css';
 
 export const metadata = {
   title: 'Casa do Pão de Queijo | Cardápio',
-  description: 'Peça pão de queijo, salgados, cafés e bebidas na Casa do Pão de Queijo.'
+  description: 'Peça pão de queijo, salgados, cafés e bebidas na Casa do Pão de Queijo.',
+  applicationName: 'Casa do Pão de Queijo',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Pão de Queijo',
+    statusBarStyle: 'default'
+  }
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#f4a300'
+  themeColor: '#f47a18'
 };
 
 export default function RootLayout({ children }) {
