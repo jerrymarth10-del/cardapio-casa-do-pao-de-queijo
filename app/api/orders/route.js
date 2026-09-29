@@ -2,6 +2,24 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
+const STORE_ID_ALIASES = {
+  'cidade-alta': '11111111-1111-4111-8111-111111111111',
+  'norte-sul': '22222222-2222-4222-8222-222222222222'
+};
+
+const PRODUCT_ID_ALIASES = {
+  'pao-queijo-tradicional': 'a1111111-1111-4111-8111-111111111111',
+  'pao-queijo-recheado': 'a2222222-2222-4222-8222-222222222222',
+  'salgado-assado': 'a3333333-3333-4333-8333-333333333333',
+  'risoles': 'a4444444-4444-4444-8444-444444444444',
+  'cafe': 'a5555555-5555-4555-8555-555555555555',
+  'cafe-com-leite': 'a6666666-6666-4666-8666-666666666666',
+  'todinho': 'a7777777-7777-4777-8777-777777777777',
+  'refrigerante': 'a8888888-8888-4888-8888-888888888888',
+  'tampico': 'a9999999-9999-4999-8999-999999999999',
+  'gatorade': 'abbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
+};
+
 function orderNumber() {
   const now = new Date();
   const stamp = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
@@ -13,6 +31,120 @@ function safeOptions(raw) {
   if (Array.isArray(raw)) return raw;
   if (!raw) return [];
   try { return typeof raw === 'string' ? JSON.parse(raw) : []; } catch { return []; }
+}
+
+function normalizeLabel(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase();
+}
+
+function orderProductView(product) {
+  const name = normalizeLabel(product?.name);
+
+  if (name === 'pao de queijo recheado') {
+    return {
+      name: product.name,
+      options: [{
+        name: 'Recheio',
+        required: true,
+        type: 'single',
+        values: [
+          { label: 'Calabresa', price_delta: 0 },
+          { label: 'Frango com catupiry', price_delta: 0 },
+          { label: 'Catupiry puro', price_delta: 0 },
+          { label: 'Doce de leite', price_delta: 0 },
+          { label: 'Goiabada', price_delta: 0 },
+          { label: 'Nutella', price_delta: 0 }
+        ]
+      }]
+    };
+  }
+
+  if (name === 'risoles' || name === 'risoles fritos') {
+    return {
+      name: 'Pastel de vento',
+      options: [{
+        name: 'Sabor',
+        required: true,
+        type: 'single',
+        values: [
+          { label: 'Frango com catupiry', price_delta: 0 },
+          { label: 'Carne', price_delta: 0 },
+          { label: 'Queijo com presunto', price_delta: 0 }
+        ]
+      }]
+    };
+  }
+
+  if (name === 'refrigerante') {
+    return {
+      name: product.name,
+      options: [
+        {
+          name: 'Marca',
+          required: true,
+          type: 'single',
+          values: [
+            { label: 'Coca-Cola', price_delta: 0 },
+            { label: 'Fanta laranja', price_delta: 0 },
+            { label: 'Guaraná Antarctica', price_delta: 0 },
+            { label: 'Pepsi', price_delta: 0 },
+            { label: 'Pepsi Limão', price_delta: 0 }
+          ]
+        },
+        {
+          name: 'Tamanho',
+          required: true,
+          type: 'single',
+          values: [
+            { label: '350 ml', price_delta: 0 },
+            { label: '600 ml', price_delta: 2 },
+            { label: '1 L', price_delta: 6 },
+            { label: '2 L', price_delta: 9 }
+          ]
+        }
+      ]
+    };
+  }
+
+  if (name === 'gatorade') {
+    return {
+      name: product.name,
+      options: [{
+        name: 'Sabor',
+        required: true,
+        type: 'single',
+        values: [
+          { label: 'Vermelho', price_delta: 0 },
+          { label: 'Amarelo', price_delta: 0 },
+          { label: 'Laranja', price_delta: 0 },
+          { label: 'Azul', price_delta: 0 }
+        ]
+      }]
+    };
+  }
+
+  return { name: product.name, options: safeOptions(product.options) };
+}
+
+function validatedSelections(productOptions, requestedOptions) {
+  const selected = [];
+  for (const group of productOptions || []) {
+    const requested = (requestedOptions || []).find((item) => item?.group === group.name);
+    const value = requested ? (group.values || []).find((item) => item.label === requested.label) : null;
+    if (group.required && !value) return null;
+    if (value) {
+      selected.push({
+        group: group.name,
+        label: value.label,
+        price_delta: Number(value.price_delta || 0)
+      });
+    }
+  }
+  return selected;
 }
 
 function optionDelta(productOptions, selectedOptions) {
@@ -43,12 +175,17 @@ export async function POST(request) {
   }
 
   const supabase = createClient(url, secret, { auth: { persistSession: false, autoRefreshToken: false } });
-  const requestedItems = Array.isArray(payload.items) ? payload.items.filter((item) => item?.product_id && Number(item?.qty) > 0) : [];
-  if (!payload.store_id || !requestedItems.length) return Response.json({ error: 'Pedido sem itens ou unidade.' }, { status: 400 });
+  const requestedItems = Array.isArray(payload.items)
+    ? payload.items
+        .filter((item) => item?.product_id && Number(item?.qty) > 0)
+        .map((item) => ({ ...item, product_id: PRODUCT_ID_ALIASES[item.product_id] || item.product_id }))
+    : [];
+  const requestedStoreId = STORE_ID_ALIASES[payload.store_id] || payload.store_id;
+  if (!requestedStoreId || !requestedItems.length) return Response.json({ error: 'Pedido sem itens ou unidade.' }, { status: 400 });
 
   const productIds = [...new Set(requestedItems.map((item) => item.product_id))];
   const [{ data: store, error: storeError }, { data: products, error: productsError }, { data: availability, error: availabilityError }] = await Promise.all([
-    supabase.from('menu_stores').select('*').eq('id', payload.store_id).eq('is_active', true).maybeSingle(),
+    supabase.from('menu_stores').select('*').eq('id', requestedStoreId).eq('is_active', true).maybeSingle(),
     supabase.from('menu_products').select('*').in('id', productIds).eq('is_active', true),
     supabase.from('menu_store_products').select('*').eq('store_id', payload.store_id).in('product_id', productIds)
   ]);
@@ -68,12 +205,14 @@ export async function POST(request) {
     if (storeProduct?.available === false) continue;
     const qty = Math.max(1, Math.min(99, Math.floor(Number(requested.qty) || 1)));
     const base = storeProduct?.price_override == null ? Number(product.base_price || 0) : Number(storeProduct.price_override);
-    const selected = Array.isArray(requested.options) ? requested.options : [];
-    const unit = Math.max(0, base + optionDelta(safeOptions(product.options), selected));
+    const publicProduct = orderProductView(product);
+    const selected = validatedSelections(publicProduct.options, Array.isArray(requested.options) ? requested.options : []);
+    if (selected == null) continue;
+    const unit = Math.max(0, base + optionDelta(publicProduct.options, selected));
     validatedItems.push({
       id: crypto.randomUUID(),
       product_id: product.id,
-      product_name: product.name,
+      product_name: publicProduct.name,
       quantity: qty,
       unit_price: unit,
       options: selected,
