@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Check,
+  Download,
   ChevronLeft,
   ChevronRight,
   LocateFixed,
@@ -25,6 +26,7 @@ const STORE_KEY = 'cpq_selected_store_v2';
 const DELIVERY_CITY = 'Rolim de Moura';
 const DELIVERY_STATE = 'RO';
 const HERO_SLIDES = BRAND_MEDIA.heroSlides || [];
+const PWA_DISMISS_KEY = 'cpq_pwa_install_dismissed_v1';
 
 function normalizeOptions(options) {
   if (Array.isArray(options)) return options;
@@ -161,6 +163,9 @@ export default function MenuApp({ initialStore = '' }) {
   const [customPreview, setCustomPreview] = useState('');
   const [sending, setSending] = useState(false);
   const [locating, setLocating] = useState(false);
+  const [installEvent, setInstallEvent] = useState(null);
+  const [installVisible, setInstallVisible] = useState(false);
+  const [installHelp, setInstallHelp] = useState(false);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -214,6 +219,30 @@ export default function MenuApp({ initialStore = '' }) {
       window.removeEventListener('cpq:catalog-updated', onLocalUpdate);
     };
   }, [initialStore]);
+
+  useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const dismissed = window.localStorage.getItem(PWA_DISMISS_KEY) === '1';
+    if (!standalone && !dismissed) setInstallVisible(true);
+
+    const onInstallPrompt = (event) => {
+      event.preventDefault();
+      setInstallEvent(event);
+      if (!dismissed && !standalone) setInstallVisible(true);
+    };
+    const onInstalled = () => {
+      setInstallEvent(null);
+      setInstallVisible(false);
+      setInstallHelp(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', onInstallPrompt);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onInstallPrompt);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
+  }, []);
 
   useEffect(() => {
     if (heroPaused || HERO_SLIDES.length < 2) return;
@@ -348,6 +377,25 @@ export default function MenuApp({ initialStore = '' }) {
     setCart((current) => current
       .map((item) => item.key === key ? { ...item, qty: item.qty + delta } : item)
       .filter((item) => item.qty > 0));
+  }
+
+  async function installApp() {
+    if (installEvent) {
+      installEvent.prompt();
+      try {
+        await installEvent.userChoice;
+      } catch {}
+      setInstallEvent(null);
+      setInstallVisible(false);
+      return;
+    }
+    setInstallHelp(true);
+  }
+
+  function dismissInstall() {
+    window.localStorage.setItem(PWA_DISMISS_KEY, '1');
+    setInstallVisible(false);
+    setInstallHelp(false);
   }
 
   function captureLocation() {
@@ -586,6 +634,18 @@ export default function MenuApp({ initialStore = '' }) {
           </div>
         )) : <div className="empty">Nenhum produto encontrado nesta categoria.</div>}
       </section>
+
+      {installVisible ? (
+        <div className="pwaInstall" role="region" aria-label="Instalar aplicativo">
+          <button className="pwaDismiss" type="button" onClick={dismissInstall} aria-label="Fechar aviso de instalação"><X size={15} /></button>
+          <div className="pwaInstallIcon"><Download size={19} /></div>
+          <div className="pwaInstallCopy">
+            <strong>Instalar aplicativo</strong>
+            <span>{installHelp ? 'No iPhone: toque em Compartilhar e depois “Adicionar à Tela de Início”.' : 'Acesse o cardápio mais rápido pelo celular.'}</span>
+          </div>
+          <button className="pwaInstallButton" type="button" onClick={installApp}>{installHelp ? 'Entendi' : 'Instalar'}</button>
+        </div>
+      ) : null}
 
       {itemCount > 0 ? (
         <button className="cartFloat" onClick={() => setCartOpen(true)}>
