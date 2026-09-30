@@ -361,6 +361,14 @@ export default function MenuApp({ initialStore = '' }) {
   function beginAdd(product, basePrice, preset = null) {
     const options = normalizeOptions(product.options);
     const media = getProductMedia(product);
+
+    // Pão de queijo tradicional não possui variações: o botão + altera
+    // diretamente a quantidade, sem abrir a visualização/foto do produto.
+    if (normalizeLabel(product.name) === 'pao de queijo tradicional') {
+      addToCart(product, basePrice, []);
+      return;
+    }
+
     if (!options.length && media.gallery.length <= 1) {
       addToCart(product, basePrice, []);
       return;
