@@ -503,3 +503,73 @@ body{background:#fff!important;color:#22170f!important}
   .shell .productStepBtn{width:36px;height:36px}
   .shell .productStepQty{min-width:28px;font-size:14px}
 }
+
+/* Localização opcional em destaque no checkout */
+.shell .locationShareBox{
+  margin-top:4px;
+  padding:14px;
+  border:1px solid #f2c8a5;
+  border-radius:16px;
+  background:#fff8f2;
+}
+.shell .locationShareBox>label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:800;
+  color:#2a1c14;
+}
+.shell .locationOptional{
+  display:inline-flex;
+  align-items:center;
+  min-height:22px;
+  padding:2px 8px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #efcfb5;
+  color:#8a5a37;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+.shell .locationShareText{
+  margin:8px 0 10px;
+  color:#6f5544;
+  font-size:13px;
+  line-height:1.45;
+}
+.shell .locationShareButton{
+  width:100%;
+  min-height:48px;
+  justify-content:center;
+  gap:8px;
+  border:0!important;
+  border-radius:13px;
+  background:linear-gradient(135deg,var(--mobile-orange-2),var(--mobile-orange))!important;
+  color:#fff!important;
+  font-weight:800;
+  box-shadow:0 8px 20px rgba(244,122,24,.22);
+}
+.shell .locationShareButton:disabled{
+  opacity:.7;
+  cursor:wait;
+}
+.shell .locationSuccess{
+  margin:0 0 10px;
+  padding:9px 10px;
+  border-radius:10px;
+  background:#f2fbf3;
+  color:#2f6d3b;
+  font-size:12px;
+  font-weight:700;
+}
+.shell .locationPrivacy{
+  display:block;
+  margin-top:8px;
+  color:#8b817a;
+  font-size:11px;
+  line-height:1.35;
+  text-align:center;
+}
+

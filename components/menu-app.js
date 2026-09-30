@@ -885,13 +885,14 @@ export default function MenuApp({ initialStore = '' }) {
                     <div className="field"><label>CEP (opcional)</label><input inputMode="numeric" placeholder="76940-000" value={form.cep} onChange={(e) => setForm((f) => ({ ...f, cep: e.target.value }))} /></div>
                     <div className="field"><label>Complemento (opcional)</label><input placeholder="Apto, bloco, fundos..." value={form.complement} onChange={(e) => setForm((f) => ({ ...f, complement: e.target.value }))} /></div>
                     <div className="field full"><label>Ponto de referência (opcional)</label><input placeholder="Ex.: próximo ao mercado..." value={form.reference} onChange={(e) => setForm((f) => ({ ...f, reference: e.target.value }))} /></div>
-                    <div className="field full">
-                      <label>Localização GPS (opcional)</label>
-                      <div className="notice" style={{ marginBottom: 8 }}>O endereço acima é obrigatório. A localização é opcional e só será usada se você tocar no botão e autorizar.</div>
-                      {form.location_url ? <div className="notice" style={{ marginBottom: 8 }}>✓ Localização adicionada ao pedido.</div> : null}
-                      <button type="button" className="btn btnGhost" onClick={captureLocation} disabled={locating}>
-                        <LocateFixed size={16} /> {locating ? 'Obtendo localização...' : form.location_url ? 'Atualizar minha localização' : 'Usar minha localização'}
+                    <div className="field full locationShareBox">
+                      <label>Localização GPS <span className="locationOptional">opcional</span></label>
+                      <p className="locationShareText">Compartilhe sua localização exata para ajudar o entregador a encontrar você mais rápido.</p>
+                      {form.location_url ? <div className="locationSuccess">✓ Localização adicionada ao pedido.</div> : null}
+                      <button type="button" className="btn locationShareButton" onClick={captureLocation} disabled={locating}>
+                        <LocateFixed size={18} /> {locating ? 'Obtendo localização...' : form.location_url ? 'Atualizar minha localização' : 'Compartilhar localização exata'}
                       </button>
+                      <small className="locationPrivacy">Só será usada neste pedido e apenas se você autorizar.</small>
                     </div>
                   </> : null}
 
