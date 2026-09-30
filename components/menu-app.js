@@ -793,3 +793,5 @@ export default function MenuApp({ initialStore = '' }) {
     </main>
   );
 }
+
+// redeploy-trigger-2026-09-30-0701
