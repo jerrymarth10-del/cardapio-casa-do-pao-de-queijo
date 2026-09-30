@@ -127,6 +127,23 @@ function orderProductView(product) {
     };
   }
 
+  if (name === 'tampico') {
+    return {
+      name: product.name,
+      options: [{
+        name: 'Tamanho',
+        required: true,
+        type: 'single',
+        values: [
+          { label: '250 ml', price_delta: 0 },
+          { label: '450 ml', price_delta: 2 },
+          { label: '1 L', price_delta: 6 },
+          { label: '2 L', price_delta: 9 }
+        ]
+      }]
+    };
+  }
+
   return { name: product.name, options: safeOptions(product.options) };
 }
 
