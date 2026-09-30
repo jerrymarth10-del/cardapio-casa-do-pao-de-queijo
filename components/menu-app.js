@@ -73,7 +73,7 @@ function visualVariants(product) {
   return [{ key: product.id, name: product.name, image: '', preset: null }];
 }
 
-function MenuMedia({ source, alt = '', className = '', priority = false, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw' }) {
+function MenuMedia({ source, alt = '', className = '', priority = false, quality = 88, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw' }) {
   const [failed, setFailed] = useState(false);
   const src = failed ? '' : source;
 
@@ -90,7 +90,7 @@ function MenuMedia({ source, alt = '', className = '', priority = false, sizes =
       alt={alt}
       fill
       sizes={sizes}
-      quality={88}
+      quality={quality}
       priority={priority}
       onError={() => setFailed(true)}
     />
@@ -537,6 +537,7 @@ export default function MenuApp({ initialStore = '' }) {
                     source={slide.image}
                     alt=""
                     priority={index === 0}
+                    quality={100}
                     sizes="(max-width: 680px) calc(100vw - 24px), 1180px"
                   />
                 </div>
