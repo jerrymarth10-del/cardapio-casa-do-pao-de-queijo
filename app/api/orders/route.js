@@ -221,7 +221,10 @@ export async function POST(request) {
     const storeProduct = availabilityMap.get(product.id);
     if (storeProduct?.available === false) continue;
     const qty = Math.max(1, Math.min(99, Math.floor(Number(requested.qty) || 1)));
-    const base = storeProduct?.price_override == null ? Number(product.base_price || 0) : Number(storeProduct.price_override);
+    const isTampico = normalizeLabel(product.name) === 'tampico';
+    const base = isTampico
+      ? 6
+      : (storeProduct?.price_override == null ? Number(product.base_price || 0) : Number(storeProduct.price_override));
     const publicProduct = orderProductView(product);
     const selected = validatedSelections(publicProduct.options, Array.isArray(requested.options) ? requested.options : []);
     if (selected == null) continue;
