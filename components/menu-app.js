@@ -46,6 +46,21 @@ function normalizeLabel(value = '') {
     .toLowerCase();
 }
 
+
+function hasVariableOptionPrice(options) {
+  return normalizeOptions(options).some((group) =>
+    (group.values || []).some((value) => Number(value.price_delta || 0) !== 0)
+  );
+}
+
+function optionFinalPrice(basePrice, selections, groupName, value) {
+  const otherDelta = Object.entries(selections || {}).reduce((sum, [name, selected]) => {
+    if (name === groupName) return sum;
+    return sum + Number(selected?.price_delta || 0);
+  }, 0);
+  return Number(basePrice || 0) + otherDelta + Number(value?.price_delta || 0);
+}
+
 function visualVariants(product) {
   const name = normalizeLabel(product?.name);
   const options = normalizeOptions(product?.options);
@@ -103,6 +118,7 @@ function ProductCard({ product, store, availability, onAdd, onDecrease, cartQuan
   const visualSlug = normalizeLabel(displayName || product.name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const media = getProductMedia(product);
   const disabled = !storeProduct.available;
+  const hasVariablePrice = hasVariableOptionPrice(product.options);
 
   function tilt(event) {
     if (typeof window === 'undefined' || !window.matchMedia('(hover: hover)').matches) return;
@@ -135,7 +151,7 @@ function ProductCard({ product, store, availability, onAdd, onDecrease, cartQuan
         <div className="productFoot">
           <div className="price">
             {money(storeProduct.price)}
-            {normalizeOptions(product.options).length ? <small>a partir de</small> : null}
+            {hasVariablePrice ? <small>a partir de</small> : null}
           </div>
           {cartQuantity > 0 ? (
             <div className="productStepper" aria-label={`Quantidade de ${displayName || product.name}: ${cartQuantity}`}>
@@ -771,7 +787,7 @@ export default function MenuApp({ initialStore = '' }) {
                               {optionImage ? <span className="optionChoiceThumb"><MenuMedia source={optionImage} alt="" sizes="58px" /></span> : null}
                               <span>{active ? <Check size={16} style={{ verticalAlign: '-3px', marginRight: 6 }} /> : null}{value.label}</span>
                             </span>
-                            <strong>{Number(value.price_delta || 0) ? `+ ${money(value.price_delta)}` : ''}</strong>
+                            <strong>{hasVariableOptionPrice([group]) ? money(optionFinalPrice(customBasePrice, selections, group.name, value)) : ''}</strong>
                           </button>
                         </div>
                       );

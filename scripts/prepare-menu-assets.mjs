@@ -35,7 +35,7 @@ const REQUIRED_ASSETS = [
   'cafe-novo.webp','cafe-com-leite-novo.webp','salgado-frango-catupiry.webp','salgado-carne-novo.webp',
   'salgado-queijo-presunto-novo.webp','salgado-mini-pizza.webp','refri-coca.webp','refri-fanta.webp',
   'refri-guarana.webp','refri-pepsi.webp','refri-pepsi-limao.webp','gatorade-vermelho.webp',
-  'gatorade-amarelo.webp','gatorade-laranja.webp','gatorade-azul.webp'
+  'gatorade-amarelo.webp','gatorade-laranja.webp','gatorade-azul.webp','red-bull.webp','cafe-agua-dourada.webp'
 ];
 
 for (const filename of REQUIRED_ASSETS) {

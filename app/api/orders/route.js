@@ -20,6 +20,21 @@ const PRODUCT_ID_ALIASES = {
   'gatorade': 'abbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'
 };
 
+const SPECIAL_PRODUCTS = {
+  'accccccc-cccc-4ccc-8ccc-cccccccccccc': {
+    id: 'accccccc-cccc-4ccc-8ccc-cccccccccccc',
+    name: 'Red Bull',
+    base_price: 12,
+    options: []
+  },
+  'addddddd-dddd-4ddd-8ddd-dddddddddddd': {
+    id: 'addddddd-dddd-4ddd-8ddd-dddddddddddd',
+    name: 'Café Água Dourada',
+    base_price: 39.99,
+    options: []
+  }
+};
+
 function orderNumber() {
   const now = new Date();
   const stamp = `${String(now.getFullYear()).slice(-2)}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
@@ -58,6 +73,22 @@ function orderProductView(product) {
           { label: 'Doce de leite', price_delta: 0 },
           { label: 'Goiabada', price_delta: 0 },
           { label: 'Nutella', price_delta: 0 }
+        ]
+      }]
+    };
+  }
+
+
+  if (name === 'cafe') {
+    return {
+      name: product.name,
+      options: [{
+        name: 'Açúcar',
+        required: true,
+        type: 'single',
+        values: [
+          { label: 'Com açúcar', price_delta: 0 },
+          { label: 'Sem açúcar', price_delta: 0 }
         ]
       }]
     };
@@ -102,7 +133,7 @@ function orderProductView(product) {
           values: [
             { label: '350 ml', price_delta: 0 },
             { label: '600 ml', price_delta: 2 },
-            { label: '1 L', price_delta: 6 },
+            { label: '1 L', price_delta: 4 },
             { label: '2 L', price_delta: 9 }
           ]
         }
@@ -138,7 +169,7 @@ function orderProductView(product) {
           { label: '250 ml', price_delta: 0 },
           { label: '450 ml', price_delta: 2 },
           { label: '1 L', price_delta: 6 },
-          { label: '2 L', price_delta: 9 }
+          { label: '2 L', price_delta: 10 }
         ]
       }]
     };
@@ -212,6 +243,9 @@ export async function POST(request) {
   }
 
   const productMap = new Map((products || []).map((product) => [product.id, product]));
+  for (const [id, product] of Object.entries(SPECIAL_PRODUCTS)) {
+    if (productIds.includes(id)) productMap.set(id, product);
+  }
   const availabilityMap = new Map((availability || []).map((row) => [row.product_id, row]));
   const validatedItems = [];
 
@@ -221,17 +255,25 @@ export async function POST(request) {
     const storeProduct = availabilityMap.get(product.id);
     if (storeProduct?.available === false) continue;
     const qty = Math.max(1, Math.min(99, Math.floor(Number(requested.qty) || 1)));
-    const isTampico = normalizeLabel(product.name) === 'tampico';
-    const base = isTampico
-      ? 6
-      : (storeProduct?.price_override == null ? Number(product.base_price || 0) : Number(storeProduct.price_override));
+    const normalizedName = normalizeLabel(product.name);
+    const officialBasePrices = {
+      'refrigerante': 6,
+      'tampico': 6,
+      'cafe': 3,
+      'red bull': 12,
+      'cafe agua dourada': 39.99
+    };
+    const officialPrice = officialBasePrices[normalizedName];
+    const base = officialPrice == null
+      ? (storeProduct?.price_override == null ? Number(product.base_price || 0) : Number(storeProduct.price_override))
+      : Number(officialPrice);
     const publicProduct = orderProductView(product);
     const selected = validatedSelections(publicProduct.options, Array.isArray(requested.options) ? requested.options : []);
     if (selected == null) continue;
     const unit = Math.max(0, base + optionDelta(publicProduct.options, selected));
     validatedItems.push({
       id: crypto.randomUUID(),
-      product_id: product.id,
+      product_id: SPECIAL_PRODUCTS[product.id] ? null : product.id,
       product_name: publicProduct.name,
       quantity: qty,
       unit_price: unit,
