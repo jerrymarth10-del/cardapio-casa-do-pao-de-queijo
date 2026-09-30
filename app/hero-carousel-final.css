@@ -1,0 +1,111 @@
+/* Ajuste final — SOMENTE carrossel/banner do topo */
+.shell .heroCard.heroCarousel{
+  width:100%!important;
+  aspect-ratio:3 / 1!important;
+  min-height:0!important;
+  height:auto!important;
+  padding:0!important;
+  overflow:hidden!important;
+  position:relative!important;
+  border-radius:22px!important;
+  background:#1b120d!important;
+  touch-action:pan-y!important;
+}
+
+.shell .heroSlides,
+.shell .heroSlide{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+}
+
+.shell .heroSlides{overflow:hidden!important}
+
+.shell .heroSlide{
+  opacity:0!important;
+  transform:none!important;
+  transition:opacity .55s ease!important;
+  pointer-events:none!important;
+}
+
+.shell .heroSlide.active{
+  opacity:1!important;
+  transform:none!important;
+  pointer-events:auto!important;
+}
+
+.shell .heroSlide .menuMedia{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  transform:none!important;
+  filter:none!important;
+}
+
+.shell .heroShade,
+.shell .heroCarouselCopy{display:none!important}
+
+.shell .heroDots{
+  left:50%!important;
+  right:auto!important;
+  bottom:10px!important;
+  transform:translateX(-50%)!important;
+  gap:6px!important;
+}
+
+.shell .heroDots button{
+  width:7px!important;
+  height:7px!important;
+  min-width:7px!important;
+  border-radius:999px!important;
+  background:rgba(255,255,255,.72)!important;
+  box-shadow:0 1px 5px rgba(0,0,0,.28)!important;
+}
+
+.shell .heroDots button.active{
+  width:20px!important;
+  background:#ffab22!important;
+}
+
+.shell .heroArrow{
+  width:36px!important;
+  height:36px!important;
+  background:rgba(0,0,0,.38)!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  color:#fff!important;
+  box-shadow:none!important;
+}
+
+.shell .heroArrowLeft{left:10px!important}
+.shell .heroArrowRight{right:10px!important}
+
+@media(max-width:680px){
+  .shell .hero{padding-top:8px!important}
+  .shell .heroCard.heroCarousel{
+    aspect-ratio:3 / 1!important;
+    min-height:0!important;
+    border-radius:16px!important;
+  }
+  .shell .heroSlide .menuMedia{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center center!important;
+  }
+  .shell .heroArrow{display:none!important}
+  .shell .heroDots{bottom:7px!important}
+  .shell .heroDots button{
+    width:6px!important;
+    height:6px!important;
+    min-width:6px!important;
+  }
+  .shell .heroDots button.active{width:18px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .shell .heroSlide{transition:none!important}
+}
