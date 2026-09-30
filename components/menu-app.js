@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   Download,
@@ -151,6 +151,7 @@ export default function MenuApp({ initialStore = '' }) {
   const [source, setSource] = useState('loading');
   const [heroIndex, setHeroIndex] = useState(0);
   const [heroPaused, setHeroPaused] = useState(false);
+  const heroTouchStart = useRef(null);
   const [storeId, setStoreId] = useState(initialStore);
   const [storeGateOpen, setStoreGateOpen] = useState(false);
   const [category, setCategory] = useState('all');
@@ -253,7 +254,7 @@ export default function MenuApp({ initialStore = '' }) {
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const timer = window.setInterval(() => {
       setHeroIndex((current) => (current + 1) % HERO_SLIDES.length);
-    }, 4800);
+    }, 4500);
     return () => window.clearInterval(timer);
   }, [heroPaused]);
 
@@ -525,6 +526,25 @@ export default function MenuApp({ initialStore = '' }) {
             className="heroCard heroCarousel"
             onMouseEnter={() => setHeroPaused(true)}
             onMouseLeave={() => setHeroPaused(false)}
+            onTouchStart={(event) => {
+              heroTouchStart.current = event.changedTouches?.[0]?.clientX ?? null;
+              setHeroPaused(true);
+            }}
+            onTouchEnd={(event) => {
+              const start = heroTouchStart.current;
+              const end = event.changedTouches?.[0]?.clientX ?? null;
+              if (start != null && end != null && Math.abs(end - start) > 42) {
+                setHeroIndex((current) => end < start
+                  ? (current + 1) % HERO_SLIDES.length
+                  : (current - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+              }
+              heroTouchStart.current = null;
+              setHeroPaused(false);
+            }}
+            onTouchCancel={() => {
+              heroTouchStart.current = null;
+              setHeroPaused(false);
+            }}
           >
             <div className="heroSlides" aria-live="polite">
               {(HERO_SLIDES.length ? HERO_SLIDES : [{ image: BRAND_MEDIA.fachada, title: 'Quentinho, rápido e do seu jeito.', text: 'Escolha sua unidade e faça seu pedido.' }]).map((slide, index) => (
@@ -537,17 +557,11 @@ export default function MenuApp({ initialStore = '' }) {
                     source={slide.image}
                     alt=""
                     priority={index === 0}
-                    quality={100}
-                    sizes="(max-width: 680px) calc(100vw - 24px), 1180px"
+                    quality={95}
+                    sizes="(max-width: 680px) calc(100vw - 20px), (max-width: 1500px) calc(100vw - 40px), 1460px"
                   />
                 </div>
               ))}
-            </div>
-            <div className="heroShade" />
-            <div className="heroCopy heroCarouselCopy">
-              <span className="eyebrow"><PackageCheck size={14} /> pedido direto da loja</span>
-              <h1>{HERO_SLIDES[heroIndex]?.title || 'Quentinho, rápido e do seu jeito.'}</h1>
-              <p>{HERO_SLIDES[heroIndex]?.text || 'Escolha sua unidade em Rolim de Moura, monte o pedido e envie direto para o WhatsApp da loja certa.'}</p>
             </div>
             {HERO_SLIDES.length > 1 ? (
               <>
