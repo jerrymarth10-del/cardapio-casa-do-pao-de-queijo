@@ -390,3 +390,50 @@ body{background:#fff!important;color:#22170f!important}
 @media(prefers-reduced-motion:reduce){
   .shell .heroSlide{transition:none!important}
 }
+
+
+/* Controle de quantidade direto no card */
+.shell .productStepper{
+  display:inline-grid;
+  grid-template-columns:38px 34px 38px;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  border:1px solid #f2d5bd;
+  border-radius:999px;
+  background:#fff8f1;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(115,62,22,.06);
+}
+.shell .productStepBtn{
+  width:38px;
+  height:38px;
+  display:grid;
+  place-items:center;
+  border:0;
+  background:transparent;
+  color:#d85a08;
+  cursor:pointer;
+}
+.shell .productStepBtn:active{transform:scale(.94)}
+.shell .productStepBtn:disabled{opacity:.45;cursor:not-allowed}
+.shell .productStepPlus{
+  background:linear-gradient(135deg,var(--mobile-orange-2),var(--mobile-orange));
+  color:#fff;
+}
+.shell .productStepQty{
+  min-width:34px;
+  text-align:center;
+  font-size:15px;
+  color:#2b1b12;
+  font-variant-numeric:tabular-nums;
+}
+
+@media(max-width:680px){
+  .shell .productStepper{
+    grid-template-columns:36px 28px 36px;
+    min-height:38px;
+  }
+  .shell .productStepBtn{width:36px;height:36px}
+  .shell .productStepQty{min-width:28px;font-size:14px}
+}
