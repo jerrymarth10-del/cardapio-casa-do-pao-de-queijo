@@ -11,6 +11,13 @@ export const metadata = {
   description: 'Peça pão de queijo, salgados, cafés e bebidas na Casa do Pão de Queijo.',
   applicationName: 'Casa do Pão de Queijo',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: [
+      { url: '/pwa-icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/pwa-icon-512.png', sizes: '512x512', type: 'image/png' }
+    ],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }]
+  },
   appleWebApp: {
     capable: true,
     title: 'Pão de Queijo',

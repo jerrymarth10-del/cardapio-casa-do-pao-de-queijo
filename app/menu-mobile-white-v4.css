@@ -115,40 +115,103 @@ body{background:#fff!important;color:#22170f!important}
 }
 .shell .optionChoiceWrap:first-child .optionSubhead{margin-top:2px}
 
-/* convite PWA */
+/* PWA compacto e sempre acessível enquanto não estiver instalado */
 .shell .pwaInstall{
   position:fixed;
-  left:14px;
-  bottom:14px;
-  z-index:58;
-  width:min(370px,calc(100vw - 28px));
-  min-height:72px;
-  display:grid;
-  grid-template-columns:42px minmax(0,1fr) auto;
-  gap:10px;
-  align-items:center;
-  padding:11px 12px;
+  left:12px;
+  bottom:max(12px,env(safe-area-inset-bottom));
+  z-index:90;
+  width:min(248px,calc(100vw - 24px));
+  padding:6px 30px 6px 6px;
   border:1px solid #eadfd7;
-  border-radius:18px;
+  border-radius:16px;
   background:rgba(255,255,255,.98);
-  box-shadow:0 14px 34px rgba(46,30,19,.16);
-  backdrop-filter:blur(12px)
+  box-shadow:0 12px 30px rgba(46,30,19,.16);
+  backdrop-filter:blur(12px);
+  transition:width .18s ease,box-shadow .18s ease
+}
+.shell .pwaInstall.expanded{
+  width:min(330px,calc(100vw - 24px));
+  box-shadow:0 16px 36px rgba(46,30,19,.2)
 }
 .shell .pwaDismiss{
-  position:absolute;top:-7px;right:-7px;
-  width:26px;height:26px;border-radius:50%;
-  border:1px solid #e7ded7;background:#fff;color:#66584f;
-  display:grid;place-items:center;box-shadow:0 4px 10px rgba(0,0,0,.08)
+  position:absolute;
+  top:5px;
+  right:5px;
+  width:24px;
+  height:24px;
+  border:0;
+  border-radius:50%;
+  background:#f7f2ee;
+  color:#75675f;
+  display:grid;
+  place-items:center;
+  cursor:pointer
+}
+.shell .pwaInstallTrigger{
+  width:100%;
+  min-height:42px;
+  display:grid;
+  grid-template-columns:36px minmax(0,1fr);
+  gap:8px;
+  align-items:center;
+  padding:0;
+  border:0;
+  background:transparent;
+  text-align:left;
+  cursor:pointer
 }
 .shell .pwaInstallIcon{
-  width:42px;height:42px;border-radius:13px;
-  display:grid;place-items:center;background:#fff2e6;color:#e5660d
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(135deg,#ff9a24,#f47a18);
+  color:#fff;
+  box-shadow:0 5px 12px rgba(244,122,24,.22)
 }
-.shell .pwaInstallCopy{display:flex;flex-direction:column;gap:2px;min-width:0}
-.shell .pwaInstallCopy strong{font-size:13px;color:#23170f}
-.shell .pwaInstallCopy span{font-size:11px;line-height:1.3;color:#887d76}
-.shell .pwaInstallButton{
-  min-height:38px;padding:0 12px;border:0;border-radius:12px;font-weight:800
+.shell .pwaInstallCopy{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  padding-right:2px
+}
+.shell .pwaInstallCopy strong{
+  font-size:12px;
+  line-height:1.15;
+  color:#23170f
+}
+.shell .pwaInstallCopy span{
+  margin-top:2px;
+  font-size:10px;
+  line-height:1.2;
+  color:#887d76
+}
+.shell .pwaInstallHelp{
+  margin-top:6px;
+  padding:9px 10px;
+  border-radius:12px;
+  background:#fff7ef;
+  border:1px solid #f3ddc7
+}
+.shell .pwaInstallHelp p{
+  margin:0;
+  font-size:11px;
+  line-height:1.35;
+  color:#5f5047
+}
+.shell .pwaInstallHelp button{
+  margin-top:7px;
+  min-height:30px;
+  padding:0 10px;
+  border:0;
+  border-radius:9px;
+  background:#f47a18;
+  color:#fff;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer
 }
 .shell .cartFloat{background:#22170f!important;color:#fff!important}
 .shell .cartFloat .cartCount{background:#ff9825!important;color:#fff!important}
@@ -257,17 +320,20 @@ body{background:#fff!important;color:#22170f!important}
 
   .shell .pwaInstall{
     left:10px!important;
-    bottom:10px!important;
-    width:calc(100vw - 20px)!important;
-    min-height:66px!important;
-    grid-template-columns:38px minmax(0,1fr) auto!important;
-    border-radius:16px!important;
-    padding:9px 10px!important
+    bottom:max(10px,env(safe-area-inset-bottom))!important;
+    width:min(224px,calc(100vw - 20px))!important;
+    min-height:0!important;
+    padding:5px 29px 5px 5px!important;
+    border-radius:15px!important
   }
-  .shell .pwaInstallIcon{width:38px!important;height:38px!important}
-  .shell .pwaInstallCopy strong{font-size:12px!important}
-  .shell .pwaInstallCopy span{font-size:10px!important}
-  .shell .pwaInstallButton{min-height:34px!important;padding:0 10px!important;font-size:11px!important}
+  .shell .pwaInstall.expanded{width:min(320px,calc(100vw - 20px))!important}
+  .shell .pwaInstallTrigger{min-height:40px!important;grid-template-columns:34px minmax(0,1fr)!important;gap:7px!important}
+  .shell .pwaInstallIcon{width:34px!important;height:34px!important;border-radius:11px!important}
+  .shell .pwaInstallCopy strong{font-size:11px!important}
+  .shell .pwaInstallCopy span{font-size:9px!important}
+  .shell .pwaDismiss{width:22px!important;height:22px!important;top:4px!important;right:4px!important}
+  .shell .pwaInstallHelp{padding:8px 9px!important}
+  .shell .pwaInstallHelp p{font-size:10px!important}
 
   .shell .cartFloat{
     left:auto!important;right:10px!important;bottom:88px!important;

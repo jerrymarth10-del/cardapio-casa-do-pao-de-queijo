@@ -26,7 +26,7 @@ const STORE_KEY = 'cpq_selected_store_v2';
 const DELIVERY_CITY = 'Rolim de Moura';
 const DELIVERY_STATE = 'RO';
 const HERO_SLIDES = BRAND_MEDIA.heroSlides || [];
-const PWA_DISMISS_KEY = 'cpq_pwa_install_dismissed_v1';
+const PWA_DISMISS_KEY = 'cpq_pwa_install_dismissed_session_v2';
 
 function normalizeOptions(options) {
   if (Array.isArray(options)) return options;
@@ -196,6 +196,7 @@ export default function MenuApp({ initialStore = '' }) {
   const [installEvent, setInstallEvent] = useState(null);
   const [installVisible, setInstallVisible] = useState(false);
   const [installHelp, setInstallHelp] = useState(false);
+  const [installPlatform, setInstallPlatform] = useState('browser');
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -251,23 +252,41 @@ export default function MenuApp({ initialStore = '' }) {
   }, [initialStore]);
 
   useEffect(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const userAgent = window.navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/i.test(userAgent) || (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+    setInstallPlatform(isIOS ? 'ios' : 'browser');
+
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch((error) => console.warn('Falha ao registrar PWA:', error));
+      navigator.serviceWorker
+        .register('/sw.js', { scope: '/' })
+        .then((registration) => registration.update().catch(() => null))
+        .catch((error) => console.warn('Falha ao registrar PWA:', error));
     }
 
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    const dismissed = window.localStorage.getItem(PWA_DISMISS_KEY) === '1';
-    if (!standalone && !dismissed) setInstallVisible(true);
+    let dismissedThisSession = false;
+    try {
+      dismissedThisSession = window.sessionStorage.getItem(PWA_DISMISS_KEY) === '1';
+    } catch {}
+    if (!standalone && !dismissedThisSession) setInstallVisible(true);
 
     const onInstallPrompt = (event) => {
       event.preventDefault();
       setInstallEvent(event);
-      if (!dismissed && !standalone) setInstallVisible(true);
+      let dismissed = false;
+      try {
+        dismissed = window.sessionStorage.getItem(PWA_DISMISS_KEY) === '1';
+      } catch {}
+      if (!standalone && !dismissed) setInstallVisible(true);
     };
+
     const onInstalled = () => {
       setInstallEvent(null);
       setInstallVisible(false);
       setInstallHelp(false);
+      try {
+        window.sessionStorage.removeItem(PWA_DISMISS_KEY);
+      } catch {}
     };
 
     window.addEventListener('beforeinstallprompt', onInstallPrompt);
@@ -440,17 +459,26 @@ export default function MenuApp({ initialStore = '' }) {
     if (installEvent) {
       installEvent.prompt();
       try {
-        await installEvent.userChoice;
-      } catch {}
+        const choice = await installEvent.userChoice;
+        if (choice?.outcome === 'accepted') {
+          setInstallVisible(false);
+          setInstallHelp(false);
+        } else {
+          setInstallHelp(true);
+        }
+      } catch {
+        setInstallHelp(true);
+      }
       setInstallEvent(null);
-      setInstallVisible(false);
       return;
     }
     setInstallHelp(true);
   }
 
   function dismissInstall() {
-    window.localStorage.setItem(PWA_DISMISS_KEY, '1');
+    try {
+      window.sessionStorage.setItem(PWA_DISMISS_KEY, '1');
+    } catch {}
     setInstallVisible(false);
     setInstallHelp(false);
   }
@@ -710,14 +738,25 @@ export default function MenuApp({ initialStore = '' }) {
       </section>
 
       {installVisible ? (
-        <div className="pwaInstall" role="region" aria-label="Instalar aplicativo">
-          <button className="pwaDismiss" type="button" onClick={dismissInstall} aria-label="Fechar aviso de instalação"><X size={15} /></button>
-          <div className="pwaInstallIcon"><Download size={19} /></div>
-          <div className="pwaInstallCopy">
-            <strong>Instalar aplicativo</strong>
-            <span>{installHelp ? 'No iPhone: toque em Compartilhar e depois “Adicionar à Tela de Início”.' : 'Acesse o cardápio mais rápido pelo celular.'}</span>
-          </div>
-          <button className="pwaInstallButton" type="button" onClick={installApp}>{installHelp ? 'Entendi' : 'Instalar'}</button>
+        <div className={`pwaInstall ${installHelp ? 'expanded' : ''}`} role="region" aria-label="Baixar aplicativo do cardápio">
+          <button className="pwaDismiss" type="button" onClick={dismissInstall} aria-label="Fechar botão de instalação"><X size={14} /></button>
+          <button className="pwaInstallTrigger" type="button" onClick={installApp}>
+            <span className="pwaInstallIcon"><Download size={18} /></span>
+            <span className="pwaInstallCopy">
+              <strong>Baixar aplicativo</strong>
+              <span>{installEvent ? 'Instalar no celular' : 'Adicionar à tela inicial'}</span>
+            </span>
+          </button>
+          {installHelp ? (
+            <div className="pwaInstallHelp" role="status">
+              <p>
+                {installPlatform === 'ios'
+                  ? 'No iPhone: toque em Compartilhar e depois em “Adicionar à Tela de Início”.'
+                  : 'Abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.'}
+              </p>
+              <button type="button" onClick={() => setInstallHelp(false)}>Entendi</button>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
