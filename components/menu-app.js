@@ -73,7 +73,7 @@ function visualVariants(product) {
   return [{ key: product.id, name: product.name, image: '', preset: null }];
 }
 
-function MenuMedia({ source, alt = '', className = '', priority = false, quality = 88, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw' }) {
+function MenuMedia({ source, alt = '', className = '', priority = false, quality = 88, sizes = '(max-width: 680px) calc(100vw - 24px), (max-width: 960px) 50vw, 33vw', unoptimized = false }) {
   const [failed, setFailed] = useState(false);
   const src = failed ? '' : source;
 
@@ -92,6 +92,7 @@ function MenuMedia({ source, alt = '', className = '', priority = false, quality
       sizes={sizes}
       quality={quality}
       priority={priority}
+      unoptimized={unoptimized}
       onError={() => setFailed(true)}
     />
   );
@@ -558,6 +559,7 @@ export default function MenuApp({ initialStore = '' }) {
                     alt=""
                     priority={index === 0}
                     quality={95}
+                    unoptimized
                     sizes="(max-width: 680px) calc(100vw - 20px), (max-width: 1500px) calc(100vw - 40px), 1460px"
                   />
                 </div>
