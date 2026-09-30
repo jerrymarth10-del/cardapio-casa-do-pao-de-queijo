@@ -98,7 +98,7 @@ function MenuMedia({ source, alt = '', className = '', priority = false, quality
   );
 }
 
-function ProductCard({ product, store, availability, onAdd, displayName = '', displayImage = '', preset = null }) {
+function ProductCard({ product, store, availability, onAdd, onDecrease, cartQuantity = 0, displayName = '', displayImage = '', preset = null }) {
   const storeProduct = productForStore(product, store, availability);
   const visualSlug = normalizeLabel(displayName || product.name).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const media = getProductMedia(product);
@@ -137,10 +137,22 @@ function ProductCard({ product, store, availability, onAdd, displayName = '', di
             {money(storeProduct.price)}
             {normalizeOptions(product.options).length ? <small>a partir de</small> : null}
           </div>
-          <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price, preset)} aria-label={disabled ? `${displayName || product.name} indisponível` : `Adicionar ${displayName || product.name}`}>
-            {disabled ? <X size={18} /> : <Plus size={18} />}
-            <span>{disabled ? 'Indisponível' : 'Adicionar'}</span>
-          </button>
+          {cartQuantity > 0 ? (
+            <div className="productStepper" aria-label={`Quantidade de ${displayName || product.name}: ${cartQuantity}`}>
+              <button type="button" className="productStepBtn" onClick={onDecrease} aria-label={`Remover uma unidade de ${displayName || product.name}`}>
+                <Minus size={17} />
+              </button>
+              <strong className="productStepQty" aria-live="polite">{cartQuantity}</strong>
+              <button type="button" className="productStepBtn productStepPlus" disabled={disabled} onClick={() => onAdd(product, storeProduct.price, preset)} aria-label={`Adicionar mais uma unidade de ${displayName || product.name}`}>
+                <Plus size={17} />
+              </button>
+            </div>
+          ) : (
+            <button className="addBtn" disabled={disabled} onClick={() => onAdd(product, storeProduct.price, preset)} aria-label={disabled ? `${displayName || product.name} indisponível` : `Adicionar ${displayName || product.name}`}>
+              {disabled ? <X size={18} /> : <Plus size={18} />}
+              <span>{disabled ? 'Indisponível' : 'Adicionar'}</span>
+            </button>
+          )}
         </div>
       </div>
     </article>
@@ -384,6 +396,28 @@ export default function MenuApp({ initialStore = '' }) {
     setCart((current) => current
       .map((item) => item.key === key ? { ...item, qty: item.qty + delta } : item)
       .filter((item) => item.qty > 0));
+  }
+  function cardQuantity(product, preset = null) {
+    return cart.reduce((sum, item) => {
+      if (item.product_id !== product.id) return sum;
+      if (preset?.group && preset?.label) {
+        const matchesPreset = (item.options || []).some((option) => option.group === preset.group && option.label === preset.label);
+        return matchesPreset ? sum + item.qty : sum;
+      }
+      return sum + item.qty;
+    }, 0);
+  }
+
+  function decreaseFromCard(product, preset = null) {
+    const candidates = cart.filter((item) => {
+      if (item.product_id !== product.id) return false;
+      if (preset?.group && preset?.label) {
+        return (item.options || []).some((option) => option.group === preset.group && option.label === preset.label);
+      }
+      return true;
+    });
+    const target = candidates[candidates.length - 1];
+    if (target) changeQty(target.key, -1);
   }
 
   async function installApp() {
@@ -649,6 +683,8 @@ export default function MenuApp({ initialStore = '' }) {
                     store={selectedStore}
                     availability={catalog.availability || []}
                     onAdd={beginAdd}
+                    onDecrease={() => decreaseFromCard(product, variant.preset)}
+                    cartQuantity={cardQuantity(product, variant.preset)}
                   />
                 ))
               )}
