@@ -24,12 +24,12 @@ const SPECIAL_PRODUCTS = {
   'accccccc-cccc-4ccc-8ccc-cccccccccccc': {
     id: 'accccccc-cccc-4ccc-8ccc-cccccccccccc',
     name: 'Red Bull',
-    base_price: 12,
+    base_price: 15,
     options: []
   },
   'addddddd-dddd-4ddd-8ddd-dddddddddddd': {
     id: 'addddddd-dddd-4ddd-8ddd-dddddddddddd',
-    name: 'Café Água Dourada',
+    name: 'Café Águia Dourada',
     base_price: 39.99,
     options: []
   }
@@ -96,7 +96,7 @@ function orderProductView(product) {
 
   if (name === 'risoles' || name === 'risoles fritos') {
     return {
-      name: 'Pastel de vento',
+      name: 'Pastelão massa seca',
       options: [{
         name: 'Sabor',
         required: true,
@@ -260,8 +260,11 @@ export async function POST(request) {
       'refrigerante': 6,
       'tampico': 6,
       'cafe': 3,
-      'red bull': 12,
-      'cafe agua dourada': 39.99
+      'risoles': 8,
+      'risoles fritos': 8,
+      'pastelao massa seca': 8,
+      'red bull': 15,
+      'cafe aguia dourada': 39.99
     };
     const officialPrice = officialBasePrices[normalizedName];
     const base = officialPrice == null
