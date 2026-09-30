@@ -1,0 +1,38 @@
+name: Import hero banners HD
+
+on:
+  push:
+    branches:
+      - hero-assets-hd
+    paths:
+      - .github/workflows/import-hero-banners.yml
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: hero-assets-hd
+      - name: Download HD banners
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/menu-media
+          curl -fL --retry 3 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/d7ecfb0a-9b01-4f10-93fd-3afdce404a3b.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYTMyZDg4ZTAwZjk5MDI2MiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDg5OTE2OH0.qdJSZDsbBBtlYurU0qAiyOcsfXacW--_sj6Qf4fRvEk' -o public/menu-media/hero-pao-de-queijo-hd.png
+          curl -fL --retry 3 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/2aa6c21d-973b-448d-8493-fc3b2c8fcd49.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYTZmZjU4OGQwYjk5ZGUwNyIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDg3MjIwNX0.8uIGf_hd4kDBHi2VMpcGPtbDQqHHgai9cw8STYOVwBw' -o public/menu-media/hero-salgados-hd.png
+          curl -fL --retry 3 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/df998559-f366-429e-90c5-147c5b918afd.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiZmVjOTEzMzk3MGZlYjc5NSIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDkzNjEyMX0.NHeYhQgeEfAKtUyhhq5z9dW7pDLWS4klurz0bbnKqsg' -o public/menu-media/hero-cafe-hd.png
+          curl -fL --retry 3 'https://d2jqrm6oza8nb6.cloudfront.net/datasets/0f40422c-01b5-4d83-b9b4-b5299b841f15.png?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiYmIzZWZhYjdmNmU4MzNiYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc5MDg2MjAwN30.soVCon3eHVfHQDjvJKw4EZt6vp0C4stPA9xKJo0Wad0' -o public/menu-media/hero-bebidas-hd.png
+          file public/menu-media/hero-*.png
+      - name: Commit banners
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add public/menu-media/hero-*.png
+          git commit -m '[hero-import] adicionar banners HD do topo'
+          git push origin HEAD:hero-assets-hd
