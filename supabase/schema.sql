@@ -187,8 +187,8 @@ using (bucket_id = 'menu-products' and exists (select 1 from public.menu_admins 
 
 insert into public.menu_stores (id, slug, name, short_name, address, whatsapp, delivery_fee, sort_order)
 values
-  ('11111111-1111-4111-8111-111111111111', 'cidade-alta', 'Casa do Pão de Queijo — Cidade Alta', 'Cidade Alta', 'Cidade Alta — em frente à Farmácia Economize', '', 8.00, 1),
-  ('22222222-2222-4222-8222-222222222222', 'norte-sul', 'Casa do Pão de Queijo — Norte-Sul', 'Norte-Sul', 'Av. Norte-Sul, 4390 — em frente à Laranjas Rolim', '5569993677137', 8.00, 2)
+  ('11111111-1111-4111-8111-111111111111', 'cidade-alta', 'Casa do Pão de Queijo — Cidade Alta', 'Cidade Alta', 'Cidade Alta — em frente à Farmácia Economize', '', 5.00, 1),
+  ('22222222-2222-4222-8222-222222222222', 'norte-sul', 'Casa do Pão de Queijo — Norte-Sul', 'Norte-Sul', 'Av. Norte-Sul, 4390 — em frente à Laranjas Rolim', '5569993677137', 5.00, 2)
 on conflict (id) do update set name = excluded.name, short_name = excluded.short_name, address = excluded.address, delivery_fee = excluded.delivery_fee;
 
 insert into public.menu_categories (id, slug, name, icon, sort_order)
