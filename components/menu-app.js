@@ -555,29 +555,38 @@ export default function MenuApp({ initialStore = '' }) {
 
     const trackingUrl = trackingToken ? `${window.location.origin}/pedido/${trackingToken}` : '';
     const deliveryAddress = `${form.street}, ${form.number} — ${form.neighborhood}${form.complement ? ` — ${form.complement}` : ''} — ${DELIVERY_CITY}/${DELIVERY_STATE}${form.cep ? ` — CEP ${form.cep}` : ''}`;
+    const paymentLabels = {
+      pix: 'PIX',
+      dinheiro: 'Dinheiro',
+      cartao: 'Cartão na entrega/retirada'
+    };
+    const itemLines = cart.map((item) => {
+      const optionSummary = item.options?.length
+        ? ` (${item.options.map((option) => option.label).join(' • ')})`
+        : '';
+      return `${item.qty}x ${item.name}${optionSummary} — ${money(item.unit_price * item.qty)}`;
+    });
     const lines = [
-      '🧀 *CASA DO PÃO DE QUEIJO*',
-      `🏪 Unidade: *${selectedStore.short_name || selectedStore.name}*`,
-      orderNumber ? `🧾 Pedido: *${orderNumber}*` : '',
+      '*CASA DO PÃO DE QUEIJO*',
+      orderNumber ? `*Pedido ${orderNumber}*` : '*NOVO PEDIDO*',
+      `Unidade: ${selectedStore.short_name || selectedStore.name}`,
       '',
       '*ITENS*',
-      ...cart.flatMap((item) => [
-        `• ${item.qty}x ${item.name} — ${money(item.unit_price * item.qty)}`,
-        item.options?.length ? `  ${item.options.map((o) => `${o.group}: ${o.label}`).join(' | ')}` : ''
-      ]).filter(Boolean),
+      ...itemLines,
       '',
+      '*RESUMO*',
       `Subtotal: ${money(subtotal)}`,
-      form.fulfillment === 'delivery' ? `Entrega: ${money(deliveryFee)}` : 'Retirada na loja',
-      `*Total: ${money(total)}*`,
+      form.fulfillment === 'delivery' ? `Taxa de entrega: ${money(deliveryFee)}` : 'Retirada na loja: grátis',
+      `*TOTAL: ${money(total)}*`,
       '',
-      `👤 ${form.name}`,
-      `📱 ${form.phone}`,
-      `💳 Pagamento: ${form.payment_method}`,
-      form.fulfillment === 'delivery' ? `📍 Endereço: ${deliveryAddress}` : `📍 Retirada: ${selectedStore.address}`,
-      form.reference ? `🏠 Referência: ${form.reference}` : '',
-      form.location_url ? `🗺️ Localização GPS: ${form.location_url}` : '',
-      form.notes ? `📝 Observação: ${form.notes}` : '',
-      trackingUrl ? `🔎 Acompanhar pedido: ${trackingUrl}` : ''
+      '*CLIENTE*',
+      `${form.name} | ${form.phone}`,
+      `Pagamento: ${paymentLabels[form.payment_method] || form.payment_method}`,
+      form.fulfillment === 'delivery' ? `Endereço: ${deliveryAddress}` : `Retirada: ${selectedStore.address}`,
+      form.reference ? `Referência: ${form.reference}` : '',
+      form.location_url ? `GPS: ${form.location_url}` : '',
+      form.notes ? `Observação: ${form.notes}` : '',
+      trackingUrl ? `Acompanhar pedido: ${trackingUrl}` : ''
     ].filter(Boolean);
 
     const url = `https://wa.me/${whatsapp}?text=${encodeURIComponent(lines.join('\n'))}`;
