@@ -561,6 +561,13 @@ export default function MenuApp({ initialStore = '' }) {
       cartao: 'Cartão na entrega/retirada'
     };
     const itemLines = cart.map((item) => {
+      if (normalizeLabel(item.name) === 'refrigerante') {
+        const brand = item.options?.find((option) => option.group === 'Marca')?.label || item.name;
+        const rawSize = item.options?.find((option) => option.group === 'Tamanho')?.label || '';
+        const size = normalizeLabel(rawSize) === '350 ml' ? 'lata' : rawSize;
+        return `${item.qty}x ${brand}${size ? ` ${size}` : ''} — ${money(item.unit_price * item.qty)}`;
+      }
+
       const optionSummary = item.options?.length
         ? ` (${item.options.map((option) => option.label).join(' • ')})`
         : '';
