@@ -927,4 +927,4 @@ export default function MenuApp({ initialStore = '' }) {
   );
 }
 
-// redeploy-trigger-2026-09-30-0701
+// redeploy-trigger-2026-10-02-1054
