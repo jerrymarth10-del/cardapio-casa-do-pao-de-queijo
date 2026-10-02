@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
+const OFFICIAL_DELIVERY_FEE = 5;
+
 const STORE_ID_ALIASES = {
   'cidade-alta': '11111111-1111-4111-8111-111111111111',
   'norte-sul': '22222222-2222-4222-8222-222222222222'
@@ -289,7 +291,7 @@ export async function POST(request) {
 
   const subtotal = validatedItems.reduce((sum, item) => sum + item.line_total, 0);
   const fulfillment = payload.customer?.fulfillment === 'delivery' ? 'delivery' : 'pickup';
-  const deliveryFee = fulfillment === 'delivery' ? Number(store.delivery_fee || 0) : 0;
+  const deliveryFee = fulfillment === 'delivery' ? OFFICIAL_DELIVERY_FEE : 0;
   const total = subtotal + deliveryFee;
   const orderId = crypto.randomUUID();
   const trackingToken = crypto.randomUUID();
