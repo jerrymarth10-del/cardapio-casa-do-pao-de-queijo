@@ -96,7 +96,7 @@ function orderProductView(product) {
     };
   }
 
-  if (name === 'risoles' || name === 'risoles fritos') {
+  if (name === 'risoles' || name === 'risoles fritos' || name === 'pastelao massa seca') {
     return {
       name: 'Pastelão massa seca',
       options: [{
@@ -104,9 +104,9 @@ function orderProductView(product) {
         required: true,
         type: 'single',
         values: [
-          { label: 'Frango com catupiry', price_delta: 0 },
+          { label: 'Queijo', price_delta: 0 },
           { label: 'Carne', price_delta: 0 },
-          { label: 'Queijo com presunto', price_delta: 0 }
+          { label: 'Pizza', price_delta: 0 }
         ]
       }]
     };
