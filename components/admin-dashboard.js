@@ -16,6 +16,8 @@ import {
   X
 } from 'lucide-react';
 import { DEMO_CATALOG, money } from '@/lib/catalog';
+import OrderAnalytics from './order-analytics';
+import { matchesOrder } from '@/lib/order-report.mjs';
 import { clearLocalPreview, loadCatalog, writeLocalPreview } from '@/lib/catalog-service';
 import { getSupabaseBrowser, hasSupabaseConfig } from '@/lib/supabase-browser';
 
@@ -51,6 +53,7 @@ export default function AdminDashboard() {
   const [tab, setTab] = useState('overview');
   const [catalog, setCatalog] = useState(DEMO_CATALOG);
   const [orders, setOrders] = useState([]);
+  const [orderSearch, setOrderSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(!cloud);
   const [session, setSession] = useState(null);
@@ -125,6 +128,8 @@ export default function AdminDashboard() {
       setSession(next);
       if (!next?.user) {
         setAuthorized(false);
+        setOrders([]);
+        setCatalog({ stores: [], categories: [], products: [], availability: [] });
         return;
       }
       const ok = await verifyAdmin(next.user.id);
@@ -364,6 +369,10 @@ export default function AdminDashboard() {
     newOrders: orders.filter((o) => o.status === 'new').length
   }), [catalog, orders]);
 
+  if (!cloud) {
+    return <main className="loginWrap"><section className="loginCard"><h1>Painel administrativo</h1><p>O banco de pedidos ainda não está conectado. A administração será liberada após a configuração segura do acesso.</p><a href="/">Voltar ao cardápio</a></section></main>;
+  }
+
   if (cloud && (!session || !authorized)) {
     return (
       <main className="loginWrap">
@@ -394,27 +403,19 @@ export default function AdminDashboard() {
       <div className="container adminLayout">
         <aside className="adminSide">
           <nav className="adminNav">
-            <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><LayoutDashboard size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Visão geral</button>
+            <button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><LayoutDashboard size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Dashboard</button>
             <button className={tab === 'products' ? 'active' : ''} onClick={() => setTab('products')}><Boxes size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Produtos</button>
             <button className={tab === 'categories' ? 'active' : ''} onClick={() => setTab('categories')}><Settings2 size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Categorias</button>
             <button className={tab === 'stores' ? 'active' : ''} onClick={() => setTab('stores')}><Store size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Lojas</button>
             <button className={tab === 'orders' ? 'active' : ''} onClick={() => setTab('orders')}><ClipboardList size={16} style={{ verticalAlign: '-3px', marginRight: 7 }} />Pedidos</button>
+            <button className={tab === 'reports' ? 'active' : ''} onClick={() => setTab('reports')}>Relatórios</button>
           </nav>
         </aside>
 
         <section className="adminMain">
           {!cloud ? <div className="notice" style={{ marginBottom: 14 }}><strong>Modo de prévia local.</strong> As mudanças funcionam neste navegador para testar o painel. Quando o Supabase do cardápio for conectado, o mesmo painel passa a salvar para todos os clientes.</div> : null}
 
-          {tab === 'overview' ? <>
-            <div className="adminTitle"><div><h1>Visão geral</h1><p>Controle rápido das duas unidades e do catálogo.</p></div></div>
-            <div className="stats">
-              <div className="stat"><span>Produtos</span><strong>{stats.products}</strong></div>
-              <div className="stat"><span>Ativos</span><strong>{stats.activeProducts}</strong></div>
-              <div className="stat"><span>Unidades ativas</span><strong>{stats.stores}</strong></div>
-              <div className="stat"><span>Novos pedidos</span><strong>{stats.newOrders}</strong></div>
-            </div>
-            <div className="panel"><div className="panelHead"><h2>Unidades</h2></div><div className="tableWrap"><table className="dataTable"><thead><tr><th>Loja</th><th>Endereço</th><th>WhatsApp</th><th>Entrega</th></tr></thead><tbody>{catalog.stores.map((s) => <tr key={s.id}><td><strong>{s.short_name || s.name}</strong></td><td>{s.address}</td><td>{s.whatsapp || 'Não configurado'}</td><td>{money(s.delivery_fee)}</td></tr>)}</tbody></table></div></div>
-          </> : null}
+          {tab === 'overview' || tab === 'reports' ? <OrderAnalytics key={tab} supabase={supabase} stores={catalog.stores} view={tab === 'reports' ? 'reports' : 'dashboard'} /> : null}
 
           {tab === 'products' ? <>
             <div className="adminTitle"><div><h1>Produtos</h1><p>Cadastre, edite, pause e remova itens.</p></div><button className="btn btnBrand" onClick={() => setProductEditor({ ...emptyProduct, category_id: catalog.categories[0]?.id || '' })}><Plus size={17} /> Novo produto</button></div>
@@ -433,8 +434,9 @@ export default function AdminDashboard() {
 
           {tab === 'orders' ? <>
             <div className="adminTitle"><div><h1>Pedidos</h1><p>Os botões salvam o status e abrem a mensagem pronta. Toque em Enviar no WhatsApp para avisar o cliente.</p></div></div>
+            <div className="field"><label>Pesquisar nos últimos 100 pedidos</label><input type="search" placeholder="Nome, telefone ou número" value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} /></div><p>Para consultar todo o período, use Dashboard ou Relatórios.</p>
             {orderNotice ? <div className="notice" role="status">{orderNotice}</div> : null}
-            {!cloud ? <div className="empty">Os pedidos aparecerão aqui quando o banco do cardápio estiver conectado.</div> : <div className="panel orderPanel"><div className="tableWrap"><table className="dataTable orderTable"><thead><tr><th>Pedido</th><th>Cliente</th><th>Unidade</th><th>Total</th><th>Status</th><th>Avisar cliente</th></tr></thead><tbody>{orders.map((o) => <tr key={o.id}><td><strong>{o.order_number}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{new Date(o.created_at).toLocaleString('pt-BR')}</div></td><td><strong>{o.customer_name}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{o.customer_phone}</div></td><td>{catalog.stores.find((s) => s.id === o.store_id)?.short_name || '—'}</td><td><strong>{money(o.total)}</strong></td><td><select className="orderStatusSelect" disabled={pendingOrders[o.id]} aria-label={`Status do pedido ${o.order_number}`} value={o.status} onChange={(e) => updateOrderStatus(o, e.target.value)}><option value="new">Novo</option><option value="accepted">Pedido aceito</option><option value="preparing">Em produção</option><option value="ready">Pronto</option><option value="out_for_delivery" disabled={o.fulfillment !== 'delivery'}>Saiu para entrega</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select></td><td><div className="orderQuickActions"><button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction accepted ${o.status === 'accepted' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'accepted', true)}>✅ Aceito</button><button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction preparing ${o.status === 'preparing' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'preparing', true)}>👨‍🍳 Em produção</button>{o.fulfillment === 'delivery' ? <button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction delivery ${o.status === 'out_for_delivery' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'out_for_delivery', true)}>🚀🛵 Saiu para entrega</button> : <button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction ready ${o.status === 'ready' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'ready', true)}>🛍️ Pronto p/ retirar</button>}<button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction completed ${o.status === 'completed' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'completed', true)}>💛 Concluído</button></div></td></tr>)}</tbody></table></div></div>}
+            {!cloud ? <div className="empty">Os pedidos aparecerão aqui quando o banco do cardápio estiver conectado.</div> : <div className="panel orderPanel"><div className="tableWrap"><table className="dataTable orderTable"><thead><tr><th>Pedido</th><th>Cliente</th><th>Unidade</th><th>Total</th><th>Status</th><th>Avisar cliente</th></tr></thead><tbody>{orders.filter((o) => matchesOrder(o, orderSearch)).map((o) => <tr key={o.id}><td><strong>{o.order_number}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{new Date(o.created_at).toLocaleString('pt-BR')}</div></td><td><strong>{o.customer_name}</strong><div style={{ fontSize: 11, color: '#837b76' }}>{o.customer_phone}</div></td><td>{catalog.stores.find((s) => s.id === o.store_id)?.short_name || '—'}</td><td><strong>{money(o.total)}</strong></td><td><select className="orderStatusSelect" disabled={pendingOrders[o.id]} aria-label={`Status do pedido ${o.order_number}`} value={o.status} onChange={(e) => updateOrderStatus(o, e.target.value)}><option value="new">Novo</option><option value="accepted">Pedido aceito</option><option value="preparing">Em produção</option><option value="ready">Pronto</option><option value="out_for_delivery" disabled={o.fulfillment !== 'delivery'}>Saiu para entrega</option><option value="completed">Concluído</option><option value="cancelled">Cancelado</option></select></td><td><div className="orderQuickActions"><button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction accepted ${o.status === 'accepted' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'accepted', true)}>✅ Aceito</button><button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction preparing ${o.status === 'preparing' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'preparing', true)}>👨‍🍳 Em produção</button>{o.fulfillment === 'delivery' ? <button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction delivery ${o.status === 'out_for_delivery' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'out_for_delivery', true)}>🚀🛵 Saiu para entrega</button> : <button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction ready ${o.status === 'ready' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'ready', true)}>🛍️ Pronto p/ retirar</button>}<button type="button" disabled={pendingOrders[o.id] || ['completed', 'cancelled'].includes(o.status)} className={`orderAction completed ${o.status === 'completed' ? 'active' : ''}`} onClick={() => updateOrderStatus(o, 'completed', true)}>💛 Concluído</button></div></td></tr>)}</tbody></table></div></div>}
           </> : null}
         </section>
       </div>
@@ -459,3 +461,4 @@ export default function AdminDashboard() {
     </main>
   );
 }
+
